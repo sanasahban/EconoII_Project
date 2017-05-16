@@ -1,6 +1,6 @@
-#-----Data Generating Process (DGP)-----------------------------------
+###-----Data Generating Process (DGP)---------------------------------
 
-# DGP
+## Data Generating Process (DGP)
 aplha = 0
 beta = 0
 phi2 = 0
@@ -12,7 +12,7 @@ phi <- c(0.5, 0.9, 0.99, 1) #use phi1=phi for each cases
 
 T = 10
 
-# Replication of data
+## Replication of data
 
 data <- data.frame(epsilon = rnorm(T, mean = mean_e, sd = sigma_e), 
                    i = rep(1,T), t = 1:T)
@@ -37,7 +37,7 @@ library(dplyr)
 data <- data %>% mutate(ilag1 = lag(i), tlag1 = lag(t), ylag1 = lag(y))
 
 
-#---- MLE - maximum likelihood estimation ----------------------------
+###---- MLE - maximum likelihood estimation --------------------------
 
 ## Define Log-likelihood function
 
@@ -47,7 +47,7 @@ data <- data %>% mutate(ilag1 = lag(i), tlag1 = lag(t), ylag1 = lag(y))
 #            data - data.frame with dependant and independant vars 
 #                 and their first lags (see DGP above)
 
-loglikelihood <- function(data, theta){ 
+loglikelihood <- function(theta, data){ 
   
   y <- data$y # vector of regresand/dependant variable
   ylag1 <- data$ylag1[-1] # first lag of y
@@ -119,5 +119,6 @@ theta = as.matrix(data.frame(phi1_mle = 0.5, alpha_mle = 0,
                              beta_mle = 0, sigma_e_mle = 3))
 
 ## Optimisation [not working]
-mle <- optim(theta = c(0.5, 0, 0, 3), loglikelihood, gr = score, data = data, method = "BFGS")
+mle <- optim(theta = c(0.9, 0, 0, 3), "loglikelihood", gr = "score", data = data, method = "BFGS")
+
 
