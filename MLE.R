@@ -1,7 +1,6 @@
-#---------------------------------------------------------------------
+#-----Data Generating Process (DGP)-----------------------------------
 
-#Data Generating Process (DGP)
-
+# DGP
 aplha = 0
 beta = 0
 phi2 = 0
@@ -12,6 +11,8 @@ y0 = 0 #only if phi1=1
 phi <- c(0.5, 0.9, 0.99, 1) #use phi1=phi for each cases
 
 T = 10
+
+# Replication of data
 
 data <- data.frame(epsilon = rnorm(T, mean = mean_e, sd = sigma_e), 
                    i = rep(1,T), t = 1:T)
@@ -30,41 +31,93 @@ for (t in 1:T) {
 }
 
 data <- data.frame(data, y)
+
+## calcuating first lags of dependant and independant variables
 library(dplyr)
 data <- data %>% mutate(ilag1 = lag(i), tlag1 = lag(t), ylag1 = lag(y))
 
-#---------------------------------------------------------------------
 
-#MLE - maximum likelihood estimation
+#---- MLE - maximum likelihood estimation ----------------------------
 
-#create matrix of regressors where i is column of 1s and t is trend variable
-x <- cbind(data$i, data$t)
-xlag <- cbind(data$ilag1[-1] ,data$tlag1[-1])
+## Define Log-likelihood function
 
-#loglikelihood FOCS
-phi1_mle = 0.5 #test
-beta_mle <- matrix( c(0,0), ncol=1)  #test
-sigma_e_mle = 3
+# Arguments: theta - vector of parameters as specied below
+#               theta = (phi1_mle, alpha_mle, beta_mle, sigma_e_mle)
 
-#FOC wrt beta
+#            data - data.frame with dependant and independant vars 
+#                 and their first lags (see DGP above)
 
-(1-phi1_mle^2)*x[1,]%*%(y[1,]-x[1,]%*%beta_mle) + 
-  sum(t((x[-1,]-phi1_mle*xlag[-1,]))%*%
-        (y[-1]-x[-1,]%*%beta_mle-phi1_mle*(data$ylag1[-1]-xlag[-1,]%*%beta_mle)))==0
-
-#Log-likelihood function
-
-l <- function(data, x, xlag, theta){ #theta is a vector of parameters as specied above
-  -T/2*log(2*pi) - T*log(theta[4]) + 1/2*log(1 - theta[1]^2) -
-    (1/(2*theta[4]))*((1 - theta[1]^2)*
-                           (data$y[1] - x[1,]%*%theta[2:3])^2) + 
-                              sum((data$y[-1] - x[-1,]%*%theta[2:3] - 
-                                     theta[1]*(data$ylag1[-1] - 
-                                        xlag[-1,]%*%theta[2:3]))^2)
+loglikelihood <- function(data, theta){ 
+  
+  y <- data$y # vector of regresand/dependant variable
+  ylag1 <- data$ylag1[-1] # first lag of y
+  x <- cbind(data$i, data$t) # regressors i = column of 1s, t = trend variable
+  xlag <- cbind(data$ilag1[-1] ,data$tlag1[-1]) # first lag of regressors
+  
+  # parameters
+  phi1_mle <- theta[1]
+  beta_mle <- theta[2:3]
+  sigma_e2_mle <- theta[4] ^ 2 #variance of epsilon
+  
+  # loglikelihood function of y with normal iid innovations epsilon
+  
+  - T/2*log(2 * pi) - T/2 * log(sigma_e2_mle) + 
+    1/2 * log(1 - phi1_mle ^ 2) - 1/(2 * sigma_e2_mle) * (
+      (1 - phi1_mle ^ 2) * (y[1] - x[1,] %*% beta_mle) ^ 2 + sum(
+        (y[-1] - x[-1,] %*% beta_mle - phi1_mle * 
+           (ylag1 - xlag %*% beta_mle)) ^ 2
+        )
+    )
 }
 
-#initial value
+## Gradient (first derivative of the loglikelihood function)
+
+score <- function(theta, data){
+  y <- data$y
+  ylag1 <- data$ylag1[-1]
+  x <- cbind(data$i, data$t)
+  xlag <- cbind(data$ilag1[-1] ,data$tlag1[-1])
+  phi1_mle <- theta[1]
+  beta_mle <- theta[2:3]
+  sigma_e2_mle <- theta[4] ^ 2 #variance of epsilon
+  
+  c( 
+    # FOC wrt phi1
+    - phi1_mle/(1 - phi1_mle ^ 2) + 1/sigma_e2_mle * (
+      phi1_mle * (y[1] - x[1,] %*% beta_mle) ^ 2 + sum(
+        (ylag1 - xlag %*% beta_mle) * 
+          (y[-1] - x[-1,] %*% beta_mle - phi1_mle * 
+             (ylag1 - xlag %*% beta_mle)
+           )
+      )
+    )
+    ,
+    
+    # FOC wrt beta
+    1/sigma_e2_mle * (
+      (1 - phi1_mle ^ 2) * x[1,] %*% (y[1] - x[1,] %*% beta_mle) +
+        sum(
+          t(x[-1,] - phi1_mle * xlag) %*% 
+            (y[-1] - x[-1,] %*% beta_mle - 
+               phi1_mle * (ylag1 - xlag %*% beta_mle))
+        )
+    )
+    ,
+    
+    # FOC wrt sigma_e2
+    - T/(2 * sigma_e2_mle) + 1/(2 * sigma_e2_mle ^ 2) * (
+      (1 - phi1_mle ^ 2) * (y[1] - x[1,] %*% beta_mle) ^ 2 + sum(
+        (y[-1] - x[-1,] %*% beta_mle - 
+             phi1_mle * (ylag1 - xlag %*% beta_mle)) ^ 2
+        )
+      )
+  )
+}
+  
+## initial values for optimisation algorithm
 theta = as.matrix(data.frame(phi1_mle = 0.5, alpha_mle = 0, 
                              beta_mle = 0, sigma_e_mle = 3))
-#Optimisation
-mle <- optim(theta = c(0.5, 0, 0, 3), l, data = data, method = "BFGS")
+
+## Optimisation [not working]
+mle <- optim(theta = c(0.5, 0, 0, 3), loglikelihood, gr = score, data = data, method = "BFGS")
+
