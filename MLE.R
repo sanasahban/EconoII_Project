@@ -36,6 +36,20 @@ data <- data.frame(data, y)
 data <- data %>% 
   dplyr::mutate(ilag1 = lag(i), tlag1 = lag(t), ylag1 = lag(y))
 
+###---- OLS - ordinary least square estimaion ------------------------
+
+x <- cbind(data$i, data$t)
+beta_ols <- (solve(t(x) %*% x)) %*% (t(x) %*% y) #compute ols estimates
+rownames(beta_ols) <- c("intercept", "t")
+
+res_ols  <- data.frame(res_ols = y - x %*% beta_ols) 
+library(dplyr)
+res_ols <- res_ols %>% 
+  dplyr::mutate(res_ols_lag1 = lag(res_ols))
+phi1_ols <- (solve(t(res_ols_lag1[-1]) %*% res_ols_lag1[-1])) %*% 
+  (t(res_ols_lag1[-1]) %*% res_ols$res_ols[-1]) #compute ols estimates
+
+sigma_e2_ols <- sum(res_ols$res_ols ^ 2) / (T - 2) #st. error of OLS 
 
 ###---- MLE - maximum likelihood estimation --------------------------
 
@@ -49,7 +63,7 @@ data <- data %>%
 
 loglikelihood <- function(theta, data){ 
   
-  y <- data$y # vector of regresand/dependant variable
+  y <- data$y # vector of regressand/dependant variable
   ylag1 <- data$ylag1[-1] # first lag of y
   x <- cbind(data$i, data$t) # regressors i = column of 1s, t = trend variable
   xlag <- cbind(data$ilag1[-1], data$tlag1[-1]) # first lag of regressors
@@ -59,7 +73,8 @@ loglikelihood <- function(theta, data){
   beta_mle <- theta[2:3]
   sigma_e2_mle <- theta[4] ^ 2 #variance of epsilon
   
-  # loglikelihood function of y with normal iid innovations epsilon
+  # loglikelihood function of y with AR(1) errors and normal iid 
+  # innovations epsilon (negative of loglikelihood for maximisation)
   
   - (- T/2*log(2 * pi) - T/2 * log(sigma_e2_mle) + 
     1/2 * log(1 - phi1_mle ^ 2) - 1/(2 * sigma_e2_mle) * (
@@ -84,58 +99,48 @@ score <- function(theta, data){
   
   c( 
     # FOC wrt phi1
-    - ( - phi1_mle/(1 - phi1_mle ^ 2) + 1/sigma_e2_mle * (
+    - phi1_mle/(1 - phi1_mle ^ 2) + 1/sigma_e2_mle * (
       phi1_mle * (y[1] - x[1,] %*% beta_mle) ^ 2 + sum(
         (ylag1 - xlag %*% beta_mle) * 
           (y[-1] - x[-1,] %*% beta_mle - phi1_mle * 
              (ylag1 - xlag %*% beta_mle)
           )
       )
-    ))
+    )
     ,
     
     # FOC wrt beta
-    - ( 1/sigma_e2_mle * (
+    1/sigma_e2_mle * (
       (1 - phi1_mle ^ 2) * x[1,] %*% (y[1] - x[1,] %*% beta_mle) +
         sum(
           t(x[-1,] - phi1_mle * xlag) %*% 
             (y[-1] - x[-1,] %*% beta_mle - 
                phi1_mle * (ylag1 - xlag %*% beta_mle))
         )
-    ))
+    )
     ,
     
     # FOC wrt sigma_e2
-    - ( - T/(2 * sigma_e2_mle) + 1/(2 * sigma_e2_mle ^ 2) * (
+    - T/(2 * sigma_e2_mle) + 1/(2 * sigma_e2_mle ^ 2) * (
       (1 - phi1_mle ^ 2) * (y[1] - x[1,] %*% beta_mle) ^ 2 + sum(
         (y[-1] - x[-1,] %*% beta_mle - 
            phi1_mle * (ylag1 - xlag %*% beta_mle)) ^ 2
       )
-    ))
+    )
   )
 }
 
-## initial values for optimisation algorithm
-theta = as.matrix(data.frame(phi1_mle = 0.5, alpha_mle = 0, 
-                             beta_mle = 0, sigma_e_mle = 3))
-
 ## Use OLS for initial conditions
-x <- cbind(data$i, data$t)
-beta_ols <- (solve(t(x) %*% x)) %*% (t(x) %*% y) #compute ols estimates
-rownames(beta_ols) <- c("intercept", "t")
-
-res_ols  <- data.frame(res_ols = y - x %*% beta_ols) 
-library(dplyr)
-res_ols <- res_ols %>% 
-  dplyr::mutate(res_ols_lag1 = lag(res_ols))
-phi1_ols <- (solve(t(res_ols_lag1[-1]) %*% res_ols_lag1[-1])) %*% 
-  (t(res_ols_lag1[-1]) %*% res_ols$res_ols[-1]) #compute ols estimates
-
-sigma_e2_ols <- sum(res_ols$res_ols ^ 2) / (T - 2) #st. error of OLS regression
 
 ## Optimisation [using ols estimates as initial conditions]
-mle <- optim(par = c(phi1_ols, beta_ols, sigma_e2_ols), fn = loglikelihood, gr = score, 
-             data = data, method = "BFGS", hessian = TRUE)
-as.matrix(mle$par)
+mle <- optim(par = c(phi1_ols, beta_ols, sigma_e2_ols), 
+             fn = loglikelihood, gr = score, data = data, 
+             method = "BFGS", hessian = TRUE)
 
-# Different initial values lead to different estimates and variance is too underestimated
+as.matrix(mle$par)
+var_mle <- (- mle$hessian)
+
+# Different initial values lead to different estimates and variance is 
+# either too underestimated or hessian has *negative variance
+
+
