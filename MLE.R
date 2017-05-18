@@ -61,7 +61,7 @@ loglikelihood <- function(theta, data){
   
   # loglikelihood function of y with normal iid innovations epsilon
   
-  (- T/2*log(2 * pi) - T/2 * log(sigma_e2_mle) + 
+  - (- T/2*log(2 * pi) - T/2 * log(sigma_e2_mle) + 
     1/2 * log(1 - phi1_mle ^ 2) - 1/(2 * sigma_e2_mle) * (
       (1 - phi1_mle ^ 2) * (y[1] - x[1,] %*% beta_mle) ^ 2 + sum(
         (y[-1] - x[-1,] %*% beta_mle - phi1_mle * 
@@ -84,34 +84,34 @@ score <- function(theta, data){
   
   c( 
     # FOC wrt phi1
-    - phi1_mle/(1 - phi1_mle ^ 2) + 1/sigma_e2_mle * (
+    - ( - phi1_mle/(1 - phi1_mle ^ 2) + 1/sigma_e2_mle * (
       phi1_mle * (y[1] - x[1,] %*% beta_mle) ^ 2 + sum(
         (ylag1 - xlag %*% beta_mle) * 
           (y[-1] - x[-1,] %*% beta_mle - phi1_mle * 
              (ylag1 - xlag %*% beta_mle)
           )
       )
-    )
+    ))
     ,
     
     # FOC wrt beta
-    1/sigma_e2_mle * (
+    - ( 1/sigma_e2_mle * (
       (1 - phi1_mle ^ 2) * x[1,] %*% (y[1] - x[1,] %*% beta_mle) +
         sum(
           t(x[-1,] - phi1_mle * xlag) %*% 
             (y[-1] - x[-1,] %*% beta_mle - 
                phi1_mle * (ylag1 - xlag %*% beta_mle))
         )
-    )
+    ))
     ,
     
     # FOC wrt sigma_e2
-    - T/(2 * sigma_e2_mle) + 1/(2 * sigma_e2_mle ^ 2) * (
+    - ( - T/(2 * sigma_e2_mle) + 1/(2 * sigma_e2_mle ^ 2) * (
       (1 - phi1_mle ^ 2) * (y[1] - x[1,] %*% beta_mle) ^ 2 + sum(
         (y[-1] - x[-1,] %*% beta_mle - 
            phi1_mle * (ylag1 - xlag %*% beta_mle)) ^ 2
       )
-    )
+    ))
   )
 }
 
@@ -119,9 +119,23 @@ score <- function(theta, data){
 theta = as.matrix(data.frame(phi1_mle = 0.5, alpha_mle = 0, 
                              beta_mle = 0, sigma_e_mle = 3))
 
-## Optimisation [not working]
-mle <- optim(par = c(0.9, 0, 0, 8), fn = loglikelihood, gr = score, 
-             data = data, method = "BFGS", hessian = TRUE, control = 
-               list(fnscale = -1))
+## Use OLS for initial conditions
+x <- cbind(data$i, data$t)
+beta_ols <- (solve(t(x) %*% x)) %*% (t(x) %*% y) #compute ols estimates
+rownames(beta_ols) <- c("intercept", "t")
 
+res_ols  <- data.frame(res_ols = y - x %*% beta_ols) 
+library(dplyr)
+res_ols <- res_ols %>% 
+  dplyr::mutate(res_ols_lag1 = lag(res_ols))
+phi1_ols <- (solve(t(res_ols_lag1[-1]) %*% res_ols_lag1[-1])) %*% 
+  (t(res_ols_lag1[-1]) %*% res_ols$res_ols[-1]) #compute ols estimates
 
+sigma_e2_ols <- sum(res_ols$res_ols ^ 2) / (T - 2) #st. error of OLS regression
+
+## Optimisation [using ols estimates as initial conditions]
+mle <- optim(par = c(phi1_ols, beta_ols, sigma_e2_ols), fn = loglikelihood, gr = score, 
+             data = data, method = "BFGS", hessian = TRUE)
+as.matrix(mle$par)
+
+# Different initial values lead to different estimates and variance is too underestimated
