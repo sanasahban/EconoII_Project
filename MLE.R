@@ -143,4 +143,43 @@ var_mle <- (- mle$hessian)
 # Different initial values lead to different estimates and variance is 
 # either too underestimated or hessian has *negative variance
 
+###---- NLS - nonlinear least square estimation ----------------------
 
+nls_func <- function(theta, data){
+  
+  y <- data$y
+  ylag1 <- data$ylag1[-1]
+  x <- cbind(data$i, data$t)
+  xlag <- cbind(data$ilag1[-1] ,data$tlag1[-1])
+  
+  phi1_nls <- theta[1]
+  beta_nls <- theta[2:3]
+#  sigma_e2_nls <- theta[4] ^ 2 #variance of epsilon
+  
+  # nls objective function [epsilon*epsilon]
+  sum(
+    ((y[-1] - x[-1,] %*% beta_nls) - phi1_nls * (ylag1 - xlag %*% beta_nls)) ^ 2
+  )
+}
+
+foc_nls <- function(theta, data){
+  c(
+    # FOC wrt phi1
+    - 2 * t((ylag1 - xlag %*% beta_nls)) %*% 
+      ((y[-1] - x[-1,] %*% beta_nls) - phi1_nls * 
+         (ylag1 - xlag %*% beta_nls))
+    ,
+    # FOC wrt beta (intercept and slope)
+    2 * t((-x[-1,] + phi1_nls * xlag)) %*% 
+      ((y[-1] - x[-1,] %*% beta_nls) - phi1_nls * 
+         (ylag1 - xlag %*% beta_nls))
+  )
+}
+
+nls_est <- optim(par = c(0.4, 0, 0), fn = nls_func, gr = foc_nls, 
+             data = data, method = "BFGS")
+
+res_nls <- y - x %*% nls$est[2:3] 
+sigma_e2_nls <- sum((res_nls ^ 2) / (T - 4))
+nls_est$par
+sigma_e2_nls
