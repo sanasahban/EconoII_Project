@@ -28,7 +28,7 @@ ols_func <- function(depvar, indvar, res = NULL){
   sigma_e2_ols <- sum(res_ols$res ^ 2)/(nrow(y) - ncol(x)) # df = n - k
 
   var_cov_ols <- sigma_e2_ols * (solve(t(x) %*% x))
-  beta <- data.frame(parameter = c("intercept", "slope"), 
+  beta <- data.frame(parameter = c("Intercept", "Slope"), 
                      coefficient = beta, 
                      st.error = c(sqrt(var_cov_ols[1,1]), 
                                   sqrt(var_cov_ols[2,2]))) 
@@ -57,7 +57,7 @@ phi1_ols <- ols_func(depvar = ols_est$residuals_ols[-1,1],
 
 # updating the list to include required output only
 ols_est <- list(beta_ols = ols_est$estimates, 
-                phi1_ols = phi1_ols$estimates, 
+                phi1_ols = phi1_ols$estimates[2,], 
                 sigma_e2_ols = ols_est$sigma_e2_ols)
 rm(phi1_ols)
 
@@ -196,14 +196,14 @@ foc_nls <- function(theta, data){
 }
 
 
-nls <- function(nls_func, foc_nls, data, phi1_ols, ols_est){
+nls <- function(nls_func, foc_nls, data, ols_est){
   
   y <- as.matrix(data$y)
   ylag1 <- data$ylag1[-1]
   x <- cbind(data$i, data$t)
   xlag <- cbind(data$ilag1[-1] ,data$tlag1[-1])
   
-  phi1_nls <- phi1_ols$estimates$coefficient[2]
+  phi1_nls <- ols_est$phi1_ols$coefficient
   beta_nls <- ols_est$beta_ols$coefficient
   
   nls_par <- optim(par = c(phi1_nls, beta_nls), 
@@ -225,7 +225,7 @@ nls <- function(nls_func, foc_nls, data, phi1_ols, ols_est){
                     (ylag1 - xlag %*% nls_par$par[2:3])))
     )
   
-  phi1_nls <- data.frame(estimate = nls_par$par[1], 
+  phi1_nls <- data.frame(parameter = "Slope", estimate = nls_par$par[1], 
                          st.error = sqrt(var_cov_nls[3,3]), 
                          t_stat = nls_par$par[1] / 
                            sqrt(var_cov_nls[3,3]))
@@ -242,4 +242,4 @@ nls <- function(nls_func, foc_nls, data, phi1_ols, ols_est){
                   sigma_e2_nls = sigma_e2_nls))
 }  
 
-nls_est <- nls(nls_func, foc_nls, data, phi1_ols, ols_est)
+nls_est <- nls(nls_func, foc_nls, data, ols_est)
