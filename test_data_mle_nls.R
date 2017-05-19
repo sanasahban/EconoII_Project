@@ -1,35 +1,10 @@
-library(dplyr)
+###---- Test Data ----------------------------------------------------
 
-###-----Data Generating Process (DGP)---------------------------------
+T <- 12
 
-## Data Generating Process (DGP)
-aplha = 0
-beta = 0
-phi2 = 0
-mean_e = 0
-sigma_e =  3
+data <- data.frame(i = rep(1,T), t = c(1:T), 
+                   y = c(1, 2, 4, 6, 4, 12, 11, 13,11, 14, 16, 17))
 
-y0 = 0 #only if phi1=1
-phi <- c(0.5, 0.9, 0.99, 1) #use phi1=phi for each cases
-
-T = 10
-
-## Replication of data
-data <- data.frame(epsilon = rnorm(T, mean = mean_e, sd = sigma_e), 
-                   i = rep(1,T), t = 1:T)
-
-y <- NULL
-
-for (t in 1:T) {
-  ifelse(t == 1,
-         ifelse(abs(phi[1]) < 1, 
-                y[t] <- rnorm(1, mean = 0, 
-                              sd = sqrt((sigma_e^2)/(1-phi[1]^2))),
-                y[t] <- c(phi[1] * y0 + data$epsilon[t])),
-         y[t] <- c(phi[1] * y[as.numeric(t - 1)] + data$epsilon[t]))
-}
-
-data <- data.frame(data, y)
 
 ## calcuating first lags of dependant and independant variables
 
@@ -51,7 +26,7 @@ ols_func <- function(depvar, indvar, res = NULL){
     dplyr::mutate(res_lag1 = lag(res))
   
   sigma_e2_ols <- sum(res_ols$res ^ 2)/(nrow(y) - ncol(x)) # df = n - k
-  
+
   var_cov <- sigma_sq_ols * (solve(t(x) %*% x))
   beta <- data.frame(parameter = c("intercept", "slope"), 
                      coefficient = beta, 
@@ -61,9 +36,9 @@ ols_func <- function(depvar, indvar, res = NULL){
   # T-statistic for null hypothesis beta = 0
   beta <- beta %>%
     dplyr::mutate(t_stat = (coefficient/st.error))
-  
+
   # Compile results for output
-  
+
   ifelse(res == FALSE, 
          result <- list(estimates = beta, 
                         sigma_e2_ols = as.data.frame(sigma_e2_ols)),
@@ -105,13 +80,13 @@ loglikelihood <- function(theta, data){
   # innovations epsilon (negative of loglikelihood for maximisation)
   
   - (- T/2*log(2 * pi) - T/2 * log(sigma_e2_mle) + 
-    1/2 * log(1 - phi1_mle ^ 2) - 1/(2 * sigma_e2_mle) * (
-      (1 - phi1_mle ^ 2) * (y[1] - x[1,] %*% beta_mle) ^ 2 + sum(
-        (y[-1] - x[-1,] %*% beta_mle - phi1_mle * 
-           (ylag1 - xlag %*% beta_mle)) ^ 2
-        )
-      )
-    )
+       1/2 * log(1 - phi1_mle ^ 2) - 1/(2 * sigma_e2_mle) * (
+         (1 - phi1_mle ^ 2) * (y[1] - x[1,] %*% beta_mle) ^ 2 + sum(
+           (y[-1] - x[-1,] %*% beta_mle - phi1_mle * 
+              (ylag1 - xlag %*% beta_mle)) ^ 2
+         )
+       )
+  )
 }
 
 ## Gradient (first derivative of the loglikelihood function)
@@ -182,7 +157,7 @@ nls_func <- function(theta, data){
   
   phi1_nls <- theta[1]
   beta_nls <- theta[2:3]
-#  sigma_e2_nls <- theta[4] ^ 2 #variance of epsilon
+  #  sigma_e2_nls <- theta[4] ^ 2 #variance of epsilon
   
   # nls objective function [epsilon*epsilon]
   sum(
@@ -205,7 +180,7 @@ foc_nls <- function(theta, data){
 }
 
 nls_est <- optim(par = c(0.4, 0, 0), fn = nls_func, gr = foc_nls, 
-             data = data, method = "BFGS")
+                 data = data, method = "BFGS")
 
 res_nls <- y - x %*% nls$est[2:3] 
 sigma_e2_nls <- sum((res_nls ^ 2) / (T - 4))

@@ -105,13 +105,13 @@ loglikelihood <- function(theta, data){
   # innovations epsilon (negative of loglikelihood for maximisation)
   
   - (- T/2*log(2 * pi) - T/2 * log(sigma_e2_mle) + 
-    1/2 * log(1 - phi1_mle ^ 2) - 1/(2 * sigma_e2_mle) * (
-      (1 - phi1_mle ^ 2) * (y[1] - x[1,] %*% beta_mle) ^ 2 + sum(
-        (y[-1] - x[-1,] %*% beta_mle - phi1_mle * 
-           (ylag1 - xlag %*% beta_mle)) ^ 2
-        )
-      )
-    )
+       1/2 * log(1 - phi1_mle ^ 2) - 1/(2 * sigma_e2_mle) * (
+         (1 - phi1_mle ^ 2) * (y[1] - x[1,] %*% beta_mle) ^ 2 + sum(
+           (y[-1] - x[-1,] %*% beta_mle - phi1_mle * 
+              (ylag1 - xlag %*% beta_mle)) ^ 2
+         )
+       )
+  )
 }
 
 ## Gradient (first derivative of the loglikelihood function)
@@ -182,7 +182,7 @@ nls_func <- function(theta, data){
   
   phi1_nls <- theta[1]
   beta_nls <- theta[2:3]
-#  sigma_e2_nls <- theta[4] ^ 2 #variance of epsilon
+  #  sigma_e2_nls <- theta[4] ^ 2 #variance of epsilon
   
   # nls objective function [epsilon*epsilon]
   sum(
@@ -205,7 +205,7 @@ foc_nls <- function(theta, data){
 }
 
 nls_est <- optim(par = c(0.4, 0, 0), fn = nls_func, gr = foc_nls, 
-             data = data, method = "BFGS")
+                 data = data, method = "BFGS")
 
 res_nls <- y - x %*% nls$est[2:3] 
 sigma_e2_nls <- sum((res_nls ^ 2) / (T - 4))
