@@ -143,7 +143,13 @@ score <- function(theta, data){
 ## Use OLS for initial conditions
 
 ## Optimisation [using ols estimates as initial conditions]
-mle <- optim(par = c(phi1_ols, beta_ols, sigma_e2_ols), 
+mle_est <- optim(par = c(ols_est$phi1_ols$coefficient, 
+                     ols_est$beta_ols$coefficient, 
+                     ols_est$sigma_e2_ols$sigma_e2_ols), 
+             fn = loglikelihood, gr = score, data = data, 
+             method = "BFGS", hessian = TRUE)
+
+mle <- optim(par = c(-0.1, 0, 0, 3), 
              fn = loglikelihood, gr = score, data = data, 
              method = "BFGS", hessian = TRUE)
 
