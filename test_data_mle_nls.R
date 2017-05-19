@@ -27,11 +27,11 @@ ols_func <- function(depvar, indvar, res = NULL){
   
   sigma_e2_ols <- sum(res_ols$res ^ 2)/(nrow(y) - ncol(x)) # df = n - k
 
-  var_cov <- sigma_sq_ols * (solve(t(x) %*% x))
+  var_cov_ols <- sigma_e2_ols * (solve(t(x) %*% x))
   beta <- data.frame(parameter = c("intercept", "slope"), 
                      coefficient = beta, 
-                     st.error = c(sqrt(var_cov[1,1]), 
-                                  sqrt(var_cov[2,2]))) 
+                     st.error = c(sqrt(var_cov_ols[1,1]), 
+                                  sqrt(var_cov_ols[2,2]))) 
   
   # T-statistic for null hypothesis beta = 0
   beta <- beta %>%
@@ -46,13 +46,20 @@ ols_func <- function(depvar, indvar, res = NULL){
                         sigma_e2_ols = as.data.frame(sigma_e2_ols), 
                         residuals_ols = res_ols))
   return(result)
-  
 }
 
-beta_ols <- ols_func(depvar = data$y, indvar = data$t)
-phi1_ols <- ols_func(depvar = result$residuals_ols[-1,1], 
-                     indvar = result$residuals_ols[-1,2], res = FALSE)
 
+ols_est <- ols_func(depvar = data$y, indvar = data$t, res = TRUE)
+
+# estimating the coefficient of AR(1)
+phi1_ols <- ols_func(depvar = ols_est$residuals_ols[-1,1], 
+                     indvar = ols_est$residuals_ols[-1,2], res = FALSE)
+
+# updating the list to include required output only
+ols_est <- list(beta_ols = ols_est$estimates, 
+                phi1_ols = phi1_ols$estimates, 
+                sigma_e2_ols = ols_est$sigma_e2_ols)
+rm(phi1_ols)
 
 ###---- MLE - maximum likelihood estimation --------------------------
 
@@ -146,6 +153,7 @@ var_mle <- (- mle$hessian)
 # Different initial values lead to different estimates and variance is 
 # either too underestimated or hessian has *negative variance
 
+
 ###---- NLS - nonlinear least square estimation ----------------------
 
 nls_func <- function(theta, data){
@@ -166,6 +174,14 @@ nls_func <- function(theta, data){
 }
 
 foc_nls <- function(theta, data){
+  y <- data$y
+  ylag1 <- data$ylag1[-1]
+  x <- cbind(data$i, data$t)
+  xlag <- cbind(data$ilag1[-1] ,data$tlag1[-1])
+  
+  phi1_nls <- theta[1]
+  beta_nls <- theta[2:3]
+
   c(
     # FOC wrt phi1
     - 2 * t((ylag1 - xlag %*% beta_nls)) %*% 
@@ -179,10 +195,51 @@ foc_nls <- function(theta, data){
   )
 }
 
-nls_est <- optim(par = c(0.4, 0, 0), fn = nls_func, gr = foc_nls, 
-                 data = data, method = "BFGS")
 
-res_nls <- y - x %*% nls$est[2:3] 
-sigma_e2_nls <- sum((res_nls ^ 2) / (T - 4))
-nls_est$par
-sigma_e2_nls
+nls <- function(nls_func, foc_nls, data, phi1_ols, ols_est){
+  
+  y <- as.matrix(data$y)
+  ylag1 <- data$ylag1[-1]
+  x <- cbind(data$i, data$t)
+  xlag <- cbind(data$ilag1[-1] ,data$tlag1[-1])
+  
+  phi1_nls <- phi1_ols$estimates$coefficient[2]
+  beta_nls <- ols_est$beta_ols$coefficient
+  
+  nls_par <- optim(par = c(phi1_nls, beta_nls), 
+                   fn = nls_func, gr = foc_nls, data = data, 
+                   method = "BFGS")
+  
+  res_nls <- y[-1] - x[-1,] %*% beta_nls 
+  sigma_e2_nls <- sum((res_nls ^ 2) / (T - 4))
+  
+  var_cov_nls <- sigma_e2_nls * 
+    solve(
+      rbind(cbind(t(x[-1,] - nls_par$par[1] * xlag) %*% 
+                    (x[-1,] - nls_par$par[1] * xlag), 
+                  t(x[-1,] - nls_par$par[1] * xlag) %*% 
+                    (ylag1 - xlag %*% nls_par$par[2:3])), 
+            cbind(t(t(x[-1,] - nls_par$par[1] * xlag) %*% 
+                      (ylag1 - xlag %*% nls_par$par[2:3])), 
+                  t((ylag1 - xlag %*% nls_par$par[2:3])) %*% 
+                    (ylag1 - xlag %*% nls_par$par[2:3])))
+    )
+  
+  phi1_nls <- data.frame(estimate = nls_par$par[1], 
+                         st.error = sqrt(var_cov_nls[3,3]), 
+                         t_stat = nls_par$par[1] / 
+                           sqrt(var_cov_nls[3,3]))
+  
+  beta_nls <- data.frame(parameter = c("Intercept", "Slope"),
+                           estimate = nls_par$par[2:3], 
+                         st.error = c(sqrt(var_cov_nls[1,1]), 
+                                      sqrt(var_cov_nls[2,2])), 
+                         t_stat = nls_par$par[2:3] / 
+                           c(sqrt(var_cov_nls[1,1]), 
+                             sqrt(var_cov_nls[2,2])))
+  
+  return(list(beta_nls = beta_nls, phi1_nls = phi1_nls, 
+                  sigma_e2_nls = sigma_e2_nls))
+}  
+
+nls_est <- nls(nls_func, foc_nls, data, phi1_ols, ols_est)
