@@ -5,7 +5,6 @@ T <- 12
 data <- data.frame(i = rep(1,T), t = c(1:T), 
                    y = c(1, 2, 4, 6, 4, 12, 11, 13,11, 14, 16, 17))
 
-
 ## calcuating first lags of dependant and independant variables
 library(dplyr)
 data <- data %>% 
@@ -171,19 +170,19 @@ loglikelihood <- function(theta, data){
   xlag <- cbind(data$ilag1[-1], data$tlag1[-1]) # first lag of regressors
   
   # parameters
-  phi1_mle <- theta[1]
+  phi1_mle <- theta[1] #(exp(theta[1]) - 1) / (exp(theta[1]) + 1)
   beta_mle <- theta[2:3]
-  sigma_e2_mle <- theta[4] ^ 2 #variance of epsilon
+  sigma_e2_mle <- theta[4] #(exp(theta[4]/2)) ^ 2 #transformed variance of epsilon
   
   # loglikelihood function of y with AR(1) errors and normal iid 
   # innovations epsilon (negative of loglikelihood for maximisation)
-  
+  u <- y - x %*% beta_mle
+  ulag1 <- ylag1 - xlag %*% beta_mle
+    
   - (- T/2*log(2 * pi) - T/2 * log(sigma_e2_mle) + 
        1/2 * log(1 - phi1_mle ^ 2) - 1/(2 * sigma_e2_mle) * (
-         (1 - phi1_mle ^ 2) * (y[1] - x[1,] %*% beta_mle) ^ 2 + sum(
-           (y[-1] - x[-1,] %*% beta_mle - phi1_mle * 
-              (ylag1 - xlag %*% beta_mle)) ^ 2
-         )
+         (1 - phi1_mle ^ 2) * (u[1]) ^ 2 + sum(
+           (u[-1] - phi1_mle * (ulag1)) ^ 2)
        )
   )
 }
@@ -193,61 +192,51 @@ loglikelihood <- function(theta, data){
 score <- function(theta, data){
   y <- data$y
   ylag1 <- data$ylag1[-1]
-  x <- cbind(data$i, data$t)
+  x <- as.matrix(cbind(data$i, data$t))
   xlag <- cbind(data$ilag1[-1] ,data$tlag1[-1])
-  phi1_mle <- theta[1]
+
+  phi1_mle <- theta[1] #(exp(theta[1]) - 1) / (exp(theta[1]) + 1)
   beta_mle <- theta[2:3]
-  sigma_e2_mle <- theta[4] ^ 2 #variance of epsilon
+  sigma_e2_mle <- theta[4] #(exp(theta[4]/2)) ^ 2 #transformed variance of epsilon
+  
+  u <- y - x %*% beta_mle
+  ulag1 <- ylag1 - xlag %*% beta_mle
   
   c( 
     # FOC wrt phi1
-    - phi1_mle/(1 - phi1_mle ^ 2) + 1/sigma_e2_mle * (
-      phi1_mle * (y[1] - x[1,] %*% beta_mle) ^ 2 + sum(
-        (ylag1 - xlag %*% beta_mle) * 
-          (y[-1] - x[-1,] %*% beta_mle - phi1_mle * 
-             (ylag1 - xlag %*% beta_mle)
-          )
-      )
-    )
+    - phi1_mle/(1 - phi1_mle ^ 2) + 1/sigma_e2_mle * 
+      (phi1_mle * (u[1]) ^ 2 + sum(ulag1 * (u[-1] - phi1_mle * ulag1)))
     ,
     
     # FOC wrt beta
-    1/sigma_e2_mle * (
-      (1 - phi1_mle ^ 2) * x[1,] %*% (y[1] - x[1,] %*% beta_mle) +
-        sum(
-          t(x[-1,] - phi1_mle * xlag) %*% 
-            (y[-1] - x[-1,] %*% beta_mle - 
-               phi1_mle * (ylag1 - xlag %*% beta_mle))
-        )
+    1/sigma_e2_mle * ((1 - phi1_mle ^ 2) * t(t(x[1,])) %*% u[1] + 
+        sum(t(x[-1,] - phi1_mle * xlag) %*% (u[-1] - phi1_mle * ulag1))
     )
     ,
     
     # FOC wrt sigma_e2
-    - T/(2 * sigma_e2_mle) + 1/(2 * sigma_e2_mle ^ 2) * (
-      (1 - phi1_mle ^ 2) * (y[1] - x[1,] %*% beta_mle) ^ 2 + sum(
-        (y[-1] - x[-1,] %*% beta_mle - 
-           phi1_mle * (ylag1 - xlag %*% beta_mle)) ^ 2
-      )
-    )
+    - T/(2 * sigma_e2_mle) + 1/(2 * sigma_e2_mle ^ 2) * 
+      ((1 - phi1_mle ^ 2) * (u[1]) ^ 2 + 
+        sum((u[-1] - phi1_mle * (ulag1)) ^ 2))
   )
 }
 
-mle_est <- function(loglikelihood, score, data, ols_est){
+#mle_est <- function(loglikelihood, score, data, ols_est){
     
   ## Use OLS for initial conditions
   ## Optimisation [using ols estimates as initial conditions]
   mle <- optim(par = c(ols_est$phi1_ols$coefficient, 
                            ols_est$beta_ols$coefficient, 
                            ols_est$sigma_e2_ols$sigma_e2_ols), 
-                   fn = loglikelihood, gr = score, data = data, 
-                   method = "BFGS", hessian = TRUE)
-  
-  mle <- optim(par = c(0.5,0,0,3), 
                fn = loglikelihood, gr = score, data = data, 
                method = "BFGS", hessian = TRUE)
   
+  mle <- optim(par = c(0.1,0,0,5), 
+               fn = loglikelihood, gr = score, data = data, hessian = TRUE)
+  
   var_mle <- (- solve(mle$hessian))
   
+  #Storing the mle results
   phi1_mle <- data.frame(parameter = "Slope", 
                          coefficient = mle$par[1], 
                          st.error = sqrt(var_mle[1,1]), 
@@ -263,7 +252,22 @@ mle_est <- function(loglikelihood, score, data, ols_est){
   
   mle_est = list(beta_mle = beta_mle, phi1_mle = phi1_mle, 
                  sigma_e2_mle = sigma_e2_mle)
-  return(mle_est)
+
+  #OR in just one line 
   
-}
+  mle_est = list(beta_mle = data.frame(
+    parameter = c("Intercept","Slope"), coefficient = mle$par[2:3], 
+    st.error = c(sqrt(var_mle[2,2]),sqrt(var_mle[3,3])), 
+    t_stat = c(mle$par[2]/sqrt(var_mle[2,2]), 
+               mle$par[3]/sqrt(var_mle[3,3]))), 
+    phi1_mle = data.frame(parameter = "Slope", 
+                          coefficient = mle$par[1], 
+                          st.error = sqrt(var_mle[1,1]), 
+                          t_stat = mle$par[1]/sqrt(var_mle[1,1])), 
+    sigma_e2_mle = data.frame(sigma_e2_mle = mle$par[4]))
+  
+#  return(mle_est)
+  
+#}
+
 
