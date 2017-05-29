@@ -12,7 +12,7 @@ data <- data %>%
 
 ###---- OLS - ordinary least square estimaion ------------------------
 
-ols_func <- function(depvar, indvar, res = NULL){
+ols <- function(depvar, indvar, res = NULL){
   y <- as.matrix(depvar)
   x <- cbind(1, indvar)
 
@@ -40,18 +40,18 @@ ols_func <- function(depvar, indvar, res = NULL){
 
   ifelse(res == FALSE, 
          result <- list(estimates = beta, 
-                        sigma_e2_ols = as.data.frame(sigma_e2_ols)),
+                        sigma_e2_ols = sigma_e2_ols),
          result <- list(estimates = beta, 
-                        sigma_e2_ols = as.data.frame(sigma_e2_ols), 
+                        sigma_e2_ols = sigma_e2_ols, 
                         residuals_ols = res_ols))
   return(result)
 }
 
 
-ols_est <- ols_func(depvar = data$y, indvar = data$t, res = TRUE)
+ols_est <- ols(depvar = data$y, indvar = data$t, res = TRUE)
 
 # estimating the coefficient of AR(1)
-phi1_ols <- ols_func(depvar = ols_est$residuals_ols[-1,1], 
+phi1_ols <- ols(depvar = ols_est$residuals_ols[-1,1], 
                      indvar = ols_est$residuals_ols[-1,2], res = FALSE)
 
 # updating the list to include required output only
@@ -209,7 +209,7 @@ score <- function(theta, data){
     ,
     
     # FOC wrt beta
-    1/sigma_e2_mle * ((1 - phi1_mle ^ 2) * t(t(x[1,])) %*% u[1] + 
+    - 1/sigma_e2_mle * ((1 - phi1_mle ^ 2) * as.matrix(x[1,]) %*% u[1] + 
         sum(t(x[-1,] - phi1_mle * xlag) %*% (u[-1] - phi1_mle * ulag1))
     )
     ,
@@ -221,41 +221,22 @@ score <- function(theta, data){
   )
 }
 
-#mle_est <- function(loglikelihood, score, data, ols_est){
+mle <- function(loglikelihood, score, data, ols_est){
     
   ## Use OLS for initial conditions
+  theta <- c(ols_est$phi1_ols$coefficient, ols_est$beta_ols$coefficient, 
+           ols_est$sigma_e2_ols)
+
   ## Optimisation [using ols estimates as initial conditions]
-  mle <- optim(par = c(ols_est$phi1_ols$coefficient, 
-                           ols_est$beta_ols$coefficient, 
-                           ols_est$sigma_e2_ols$sigma_e2_ols), 
+  mle <- optim(par = theta, 
                fn = loglikelihood, gr = score, data = data, 
                method = "BFGS", hessian = TRUE)
-  
-  mle <- optim(par = c(0.1,0,0,5), 
-               fn = loglikelihood, gr = score, data = data, hessian = TRUE)
   
   var_mle <- (- solve(mle$hessian))
   
   #Storing the mle results
-  phi1_mle <- data.frame(parameter = "Slope", 
-                         coefficient = mle$par[1], 
-                         st.error = sqrt(var_mle[1,1]), 
-                         t_stat = mle$par[1]/sqrt(var_mle[1,1]))
-  
-  beta_mle <- data.frame(parameter = c("Intercept","Slope"), 
-                         coefficient = mle$par[2:3], 
-                         st.error = c(sqrt(var_mle[2,2]),sqrt(var_mle[3,3])), 
-                         t_stat = c(mle$par[2]/sqrt(var_mle[2,2]), 
-                                    mle$par[3]/sqrt(var_mle[3,3])))
-  
-  sigma_e2_mle <- mle$par[4]
-  
-  mle_est = list(beta_mle = beta_mle, phi1_mle = phi1_mle, 
-                 sigma_e2_mle = sigma_e2_mle)
 
-  #OR in just one line 
-  
-  mle_est = list(beta_mle = data.frame(
+  result = list(beta_mle = data.frame(
     parameter = c("Intercept","Slope"), coefficient = mle$par[2:3], 
     st.error = c(sqrt(var_mle[2,2]),sqrt(var_mle[3,3])), 
     t_stat = c(mle$par[2]/sqrt(var_mle[2,2]), 
@@ -264,10 +245,10 @@ score <- function(theta, data){
                           coefficient = mle$par[1], 
                           st.error = sqrt(var_mle[1,1]), 
                           t_stat = mle$par[1]/sqrt(var_mle[1,1])), 
-    sigma_e2_mle = data.frame(sigma_e2_mle = mle$par[4]))
+    sigma_e2_mle = mle$par[4])
   
-#  return(mle_est)
+  return(result)
   
-#}
+}
 
-
+mle_est <- mle(loglikelihood, score, data, ols_est)
