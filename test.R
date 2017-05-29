@@ -73,3 +73,8 @@ score <- function(theta, data){
          sum((u[-1] - phi1_mle * (ulag1)) ^ 2))
   )
 }
+
+
+plot(density(sim_results_T_200$alpha_mle_sim$phi_0.5$phi1, ylim=c(0,1), col="red"))
+lines(density(sim_results_T_200$alpha_mle_sim$phi_0.5$phi1), 
+      col="green")

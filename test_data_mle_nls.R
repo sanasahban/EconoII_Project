@@ -198,7 +198,13 @@ mle <- function(loglikelihood, score, data, ols_est){
                fn = loglikelihood, data = data, 
                method = "BFGS", hessian = TRUE)
   
-  var_mle <- ( solve(mle$hessian))
+  r_theta <- matrix(
+    c(2 * exp(mle$par[1])/(exp(mle$par[1]) + 1) ^ 2, rep(0,4), 1, 
+      rep(0,4), 1, rep(0,4), exp(mle$par[4])), 4, 4
+  )
+  
+  # covariance matrix using delta method
+  var_mle <- r_theta %*% solve(mle$hessian)  %*% solve(r_theta)
   
   #Storing the results and transforming phi1 and sigma_e2 from theta
   
