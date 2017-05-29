@@ -170,9 +170,9 @@ loglikelihood <- function(theta, data){
   xlag <- cbind(data$ilag1[-1], data$tlag1[-1]) # first lag of regressors
   
   # parameters
-  phi1_mle <- theta[1] #(exp(theta[1]) - 1) / (exp(theta[1]) + 1)
+  phi1_mle <- (exp(theta[1]) - 1) / (exp(theta[1]) + 1)
   beta_mle <- theta[2:3]
-  sigma_e2_mle <- theta[4] #(exp(theta[4]/2)) ^ 2 #transformed variance of epsilon
+  sigma_e2_mle <- (exp(theta[4]/2)) ^ 2 #transformed variance of epsilon
   
   # loglikelihood function of y with AR(1) errors and normal iid 
   # innovations epsilon (negative of loglikelihood for maximisation)
@@ -187,40 +187,6 @@ loglikelihood <- function(theta, data){
   )
 }
 
-## Gradient (first derivative of the loglikelihood function)
-
-score <- function(theta, data){
-  y <- data$y
-  ylag1 <- data$ylag1[-1]
-  x <- as.matrix(cbind(data$i, data$t))
-  xlag <- cbind(data$ilag1[-1] ,data$tlag1[-1])
-
-  phi1_mle <- theta[1] #(exp(theta[1]) - 1) / (exp(theta[1]) + 1)
-  beta_mle <- theta[2:3]
-  sigma_e2_mle <- theta[4] #(exp(theta[4]/2)) ^ 2 #transformed variance of epsilon
-  
-  u <- y - x %*% beta_mle
-  ulag1 <- ylag1 - xlag %*% beta_mle
-  
-  c( 
-    # FOC wrt phi1
-    - phi1_mle/(1 - phi1_mle ^ 2) + 1/sigma_e2_mle * 
-      (phi1_mle * (u[1]) ^ 2 + sum(ulag1 * (u[-1] - phi1_mle * ulag1)))
-    ,
-    
-    # FOC wrt beta
-    - 1/sigma_e2_mle * ((1 - phi1_mle ^ 2) * as.matrix(x[1,]) %*% u[1] + 
-        sum(t(x[-1,] - phi1_mle * xlag) %*% (u[-1] - phi1_mle * ulag1))
-    )
-    ,
-    
-    # FOC wrt sigma_e2
-    - T/(2 * sigma_e2_mle) + 1/(2 * sigma_e2_mle ^ 2) * 
-      ((1 - phi1_mle ^ 2) * (u[1]) ^ 2 + 
-        sum((u[-1] - phi1_mle * (ulag1)) ^ 2))
-  )
-}
-
 mle <- function(loglikelihood, score, data, ols_est){
     
   ## Use OLS for initial conditions
@@ -229,26 +195,28 @@ mle <- function(loglikelihood, score, data, ols_est){
 
   ## Optimisation [using ols estimates as initial conditions]
   mle <- optim(par = theta, 
-               fn = loglikelihood, gr = score, data = data, 
+               fn = loglikelihood, data = data, 
                method = "BFGS", hessian = TRUE)
   
-  var_mle <- (- solve(mle$hessian))
+  var_mle <- ( solve(mle$hessian))
   
-  #Storing the mle results
-
+  #Storing the results and transforming phi1 and sigma_e2 from theta
+  
   result = list(beta_mle = data.frame(
     parameter = c("Intercept","Slope"), coefficient = mle$par[2:3], 
     st.error = c(sqrt(var_mle[2,2]),sqrt(var_mle[3,3])), 
     t_stat = c(mle$par[2]/sqrt(var_mle[2,2]), 
                mle$par[3]/sqrt(var_mle[3,3]))), 
     phi1_mle = data.frame(parameter = "Slope", 
-                          coefficient = mle$par[1], 
+                          coefficient = (exp(mle$par[1]) - 1)/
+                            (exp(mle$par[1]) + 1), 
                           st.error = sqrt(var_mle[1,1]), 
                           t_stat = mle$par[1]/sqrt(var_mle[1,1])), 
-    sigma_e2_mle = mle$par[4])
+    sigma_e2_mle = (exp(mle$par[4]/2)) ^ 2)
   
   return(result)
   
 }
 
 mle_est <- mle(loglikelihood, score, data, ols_est)
+

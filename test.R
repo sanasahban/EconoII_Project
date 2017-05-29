@@ -38,3 +38,38 @@ phi1_mle * (y[1] - x[1,] %*% beta_mle) ^ 2 -
           phi1_mle * (ylag1 - xlag %*% beta_mle) 
       )
   )
+
+
+## Gradient (first derivative of the loglikelihood function)
+
+score <- function(theta, data){
+  y <- data$y
+  ylag1 <- data$ylag1[-1]
+  x <- as.matrix(cbind(data$i, data$t))
+  xlag <- cbind(data$ilag1[-1] ,data$tlag1[-1])
+  
+  phi1_mle <- (exp(theta[1]) - 1) / (exp(theta[1]) + 1)
+  beta_mle <- theta[2:3]
+  sigma_e2_mle <- (exp(theta[4]/2)) ^ 2 #transformed variance of epsilon
+  
+  u <- y - x %*% beta_mle
+  ulag1 <- ylag1 - xlag %*% beta_mle
+  
+  c( 
+    # FOC wrt phi1
+    - phi1_mle/(1 - phi1_mle ^ 2) + 1/sigma_e2_mle * 
+      (phi1_mle * (u[1]) ^ 2 + sum(ulag1 * (u[-1] - phi1_mle * ulag1)))
+    ,
+    
+    # FOC wrt beta
+    - 1/sigma_e2_mle * ((1 - phi1_mle ^ 2) * as.matrix(x[1,]) %*% u[1] + 
+                          sum(t(x[-1,] - phi1_mle * xlag) %*% (u[-1] - phi1_mle * ulag1))
+    )
+    ,
+    
+    # FOC wrt sigma_e2
+    - T/(2 * sigma_e2_mle) + 1/(2 * sigma_e2_mle ^ 2) * 
+      ((1 - phi1_mle ^ 2) * (u[1]) ^ 2 + 
+         sum((u[-1] - phi1_mle * (ulag1)) ^ 2))
+  )
+}
