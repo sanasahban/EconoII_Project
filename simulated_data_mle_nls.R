@@ -1,3 +1,4 @@
+install.packages("numDeriv")
 library(dplyr)
 
 ###-----Data Generating Process (DGP)---------------------------------
