@@ -309,14 +309,17 @@ for (i in 1:4){
 
 # 3.2.3
 
-sim_results_T_200 <- simulation(R = 500, T = 200)
+#sim_results_T_200 <- simulation(R = 500, T = 200)
 #Results have been saved use load("simulation_results.RData") to load
 
 # Tables
 
 # SUMMARY STATISTICS PHI 1 OLS ESTIMATE
-summary_phi1_ols <- data.frame(Phi_1 = rep(0,4), Mean = rep(0,4), 
+summary_phi1_ols <- data.frame(Phi_1 = rep(0,4), 
+                               Mean = rep(0,4), 
                                St.dev = rep(0,4), 
+                               Mean_Bias = rep(0,4),
+                               RMSE = rep(0.4),
                                Quantile_5 = rep(0,4), 
                                Median = rep(0,4), 
                                Quantile_95 = rep(0,4))
@@ -328,6 +331,12 @@ for (i in 1:4){
                                          phi1_ols_sim[[i]]$phi1), 4), 
                             round(sd(sim_results_T_200$
                                        phi1_ols_sim[[i]]$phi1), 4),
+                            round(mean(sim_results_T_200$
+                                         phi1_ols_sim[[i]]$phi1 - 
+                                         phi[i]), 4),
+                            round(sqrt(mean((sim_results_T_200$
+                                               phi1_ols_sim[[i]]$phi1 - 
+                                               phi[i]) ^ 2)), 4),
                             round(quantile(sim_results_T_200$
                                              phi1_ols_sim[[i]]$phi1, 
                                            0.05), 4),
@@ -342,6 +351,8 @@ for (i in 1:4){
 
 summary_phi1_mle <- data.frame(Phi_1 = rep(0,4), Mean = rep(0,4), 
                                St.dev = rep(0,4), 
+                               Mean_Bias = rep(0,4),
+                               RMSE = rep(0.4),
                                Quantile_5 = rep(0,4), 
                                Median = rep(0,4), 
                                Quantile_95 = rep(0,4))
@@ -353,6 +364,12 @@ for (i in 1:4){
                                          phi1_mle_sim[[i]]$phi1), 4), 
                             round(sd(sim_results_T_200$
                                        phi1_mle_sim[[i]]$phi1), 4),
+                            round(mean(sim_results_T_200$
+                                         phi1_mle_sim[[i]]$phi1 - 
+                                         phi[i]), 4),
+                            round(sqrt(mean((sim_results_T_200$
+                                               phi1_mle_sim[[i]]$phi1 - 
+                                               phi[i]) ^ 2)), 4),
                             round(quantile(sim_results_T_200$
                                              phi1_mle_sim[[i]]$phi1, 
                                            0.05), 4),
@@ -366,6 +383,8 @@ for (i in 1:4){
 # SUMMARY STATISTICS ALPHA MLE ESTIMATE
 summary_alpha_mle <- data.frame(Phi_1 = rep(0,4), Mean = rep(0,4), 
                                 St.dev = rep(0,4), 
+                                Mean_Bias = rep(0,4),
+                                RMSE = rep(0.4),
                                 Quantile_5 = rep(0,4), 
                                 Median = rep(0,4), 
                                 Quantile_95 = rep(0,4))
@@ -377,6 +396,12 @@ for (i in 1:4){
                                          alpha_mle_sim[[i]]$phi1), 4), 
                             round(sd(sim_results_T_200$
                                        alpha_mle_sim[[i]]$phi1), 4),
+                            round(mean(sim_results_T_200$
+                                         alpha_mle_sim[[i]]$phi1 - 
+                                         phi[i]), 4),
+                            round(sqrt(mean((sim_results_T_200$
+                                               alpha_mle_sim[[i]]$phi1 - 
+                                               phi[i]) ^ 2)), 4),
                             round(quantile(sim_results_T_200$
                                              alpha_mle_sim[[i]]$phi1, 
                                            0.05), 4),
@@ -390,8 +415,10 @@ for (i in 1:4){
 # SUMMARY STATISTICS BETA MLE ESTIMATE
 summary_beta_mle <- data.frame(Phi_1 = rep(0,4), Mean = rep(0,4), 
                                St.dev = rep(0,4), 
-                                Quantile_5 = rep(0,4), 
-                                Median = rep(0,4), 
+                               Mean_Bias = rep(0,4),
+                               RMSE = rep(0.4),
+                               Quantile_5 = rep(0,4), 
+                               Median = rep(0,4), 
                                Quantile_95 = rep(0,4))
 
 for (i in 1:4){
@@ -401,16 +428,21 @@ for (i in 1:4){
                                           beta_mle_sim[[i]]$phi1), 4), 
                              round(sd(sim_results_T_200$
                                         beta_mle_sim[[i]]$phi1), 4),
-                             round(quantile(sim_results_T_200$
-                                              beta_mle_sim[[i]]$phi1, 
-                                            0.05), 4),
-                             round(median(sim_results_T_200$
-                                            beta_mle_sim[[i]]$phi1), 4),
-                             round(quantile(sim_results_T_200$
-                                              beta_mle_sim[[i]]$phi1, 
-                                            0.95), 4))
+                            round(mean(sim_results_T_200$
+                                         beta_mle_sim[[i]]$phi1 - 
+                                         phi[i]), 4),
+                            round(sqrt(mean((sim_results_T_200$
+                                               beta_mle_sim[[i]]$phi1 - 
+                                               phi[i]) ^ 2)), 4),
+                            round(quantile(sim_results_T_200$
+                                             beta_mle_sim[[i]]$phi1, 
+                                           0.05), 4),
+                            round(median(sim_results_T_200$
+                                           beta_mle_sim[[i]]$phi1), 4),
+                            round(quantile(sim_results_T_200$
+                                             beta_mle_sim[[i]]$phi1, 
+                                           0.95), 4))
 }
-
 
 
 ###---- Graphs ---------------------------
