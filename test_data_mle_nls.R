@@ -204,7 +204,7 @@ mle <- function(loglikelihood, score, data, ols_est){
   )
   
   # covariance matrix using delta method
-  var_mle <- r_theta %*% solve(mle$hessian)  %*% solve(r_theta)
+  var_mle <- r_theta %*% solve(mle$hessian)  %*% t(r_theta)
   
   #Storing the results and transforming phi1 and sigma_e2 from theta
   

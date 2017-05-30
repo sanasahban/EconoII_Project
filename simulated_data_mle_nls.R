@@ -83,6 +83,7 @@ loglikelihood <- function(theta, data){
   )
 }
 
+
 mle <- function(loglikelihood, score, data, ols_est){
   
   ## Use OLS for initial conditions
@@ -98,9 +99,11 @@ mle <- function(loglikelihood, score, data, ols_est){
     c(2 * exp(mle$par[1])/(exp(mle$par[1]) + 1) ^ 2, rep(0,4), 1, 
     rep(0,4), 1, rep(0,4), exp(mle$par[4])), 4, 4
   )
-
+  
+  hessian <- hessian(func = loglikelihood, x = mle$par, data = data)
+  
   # covariance matrix using delta method
-  var_mle <- r_theta %*% solve(mle$hessian)  %*% solve(r_theta)
+  var_mle <- r_theta %*% solve(hessian)  %*% t(r_theta)
   
   #Storing the results and transforming phi1 and sigma_e2 from theta
   
@@ -218,95 +221,123 @@ simulation <- function(R, T){
               phi1_mle_sim = phi1_mle_sim))
 }
 
-## Simulation for different sample sizes
-sim_results_T_200 <- simulation(R = 200, T = 200)
+###---- Sample  200: tables & graphs ---------------------------
+
+#sim_results_T_200 <- simulation(R = 500, T = 200)
+#Results have been saved use load("simulation_results.RData") to load
 
 # Tables
-summary_phi1_ols <- data.frame(Phi_1 = rep(0,4), Mean = rep(0,4), St.dev = rep(0,4), 
+
+# SUMMARY STATISTICS PHI 1 OLS ESTIMATE
+summary_phi1_ols <- data.frame(Phi_1 = rep(0,4), Mean = rep(0,4), 
+                               St.dev = rep(0,4), 
                                Quantile_5 = rep(0,4), 
-                               Median = rep(0,4), Quantile_95 = rep(0,4))
+                               Median = rep(0,4), 
+                               Quantile_95 = rep(0,4))
 
 for (i in 1:4){
 
   summary_phi1_ols[i,] <- c(paste("Phi1 = ", phi[i]), 
-                            round(mean(sim_results_T_200$phi1_ols_sim[[i]]$phi1), 4), 
-                            round(sd(sim_results_T_200$phi1_ols_sim[[i]]$phi1), 4),
-                            round(quantile(sim_results_T_200$phi1_ols_sim[[i]]$phi1, 0.05), 4),
-                            round(median(sim_results_T_200$phi1_ols_sim[[i]]$phi1), 4),
-                            round(quantile(sim_results_T_200$phi1_ols_sim[[i]]$phi1, 0.95), 4))
-}
-
-
-# SUMMARY STATISTICS PHI 1 OLS ESTIMATE
-
-summary_phi1_mle <- data.frame(Phi_1 = rep(0,4), Mean = rep(0,4), St.dev = rep(0,4), 
-                               Quantile_5 = rep(0,4), 
-                               Median = rep(0,4), Quantile_95 = rep(0,4))
-
-for (i in 1:4){
-  
-  summary_phi1_mle[i,] <- c(paste("Phi1 = ", phi[i]), 
-                            round(mean(sim_results_T_200$phi1_mle_sim[[i]]$phi1), 4), 
-                            round(sd(sim_results_T_200$phi1_mle_sim[[i]]$phi1), 4),
-                            round(quantile(sim_results_T_200$phi1_mle_sim[[i]]$phi1, 0.05), 4),
-                            round(median(sim_results_T_200$phi1_mle_sim[[i]]$phi1), 4),
-                            round(quantile(sim_results_T_200$phi1_mle_sim[[i]]$phi1, 0.95), 4))
+                            round(mean(sim_results_T_200$
+                                         phi1_ols_sim[[i]]$phi1), 4), 
+                            round(sd(sim_results_T_200$
+                                       phi1_ols_sim[[i]]$phi1), 4),
+                            round(quantile(sim_results_T_200$
+                                             phi1_ols_sim[[i]]$phi1, 
+                                           0.05), 4),
+                            round(median(sim_results_T_200$
+                                           phi1_ols_sim[[i]]$phi1), 4),
+                            round(quantile(sim_results_T_200$
+                                             phi1_ols_sim[[i]]$phi1, 
+                                           0.95), 4))
 }
 
 # SUMMARY STATISTICS PHI 1 MLE ESTIMATE
 
-summary_phi1_mles <- data.frame(Phi_1 = rep(0,4), Mean = rep(0,4), St.dev = rep(0,4), 
+summary_phi1_mle <- data.frame(Phi_1 = rep(0,4), Mean = rep(0,4), 
+                               St.dev = rep(0,4), 
                                Quantile_5 = rep(0,4), 
-                               Median = rep(0,4), Quantile_95 = rep(0,4))
+                               Median = rep(0,4), 
+                               Quantile_95 = rep(0,4))
 
 for (i in 1:4){
   
   summary_phi1_mle[i,] <- c(paste("Phi1 = ", phi[i]), 
-                            round(mean(sim_results_T_200$phi1_mle_sim[[i]]$phi1), 4), 
-                            round(sd(sim_results_T_200$phi1_mle_sim[[i]]$phi1), 4),
-                            round(quantile(sim_results_T_200$phi1_mle_sim[[i]]$phi1, 0.05), 4),
-                            round(median(sim_results_T_200$phi1_mle_sim[[i]]$phi1), 4),
-                            round(quantile(sim_results_T_200$phi1_mle_sim[[i]]$phi1, 0.95), 4))
+                            round(mean(sim_results_T_200$
+                                         phi1_mle_sim[[i]]$phi1), 4), 
+                            round(sd(sim_results_T_200$
+                                       phi1_mle_sim[[i]]$phi1), 4),
+                            round(quantile(sim_results_T_200$
+                                             phi1_mle_sim[[i]]$phi1, 
+                                           0.05), 4),
+                            round(median(sim_results_T_200$
+                                           phi1_mle_sim[[i]]$phi1), 4),
+                            round(quantile(sim_results_T_200$
+                                             phi1_mle_sim[[i]]$phi1, 
+                                           0.95), 4))
 }
 
 # SUMMARY STATISTICS ALPHA MLE ESTIMATE
-summary_alpha_mle <- data.frame(Phi_1 = rep(0,4), Mean = rep(0,4), St.dev = rep(0,4), 
+summary_alpha_mle <- data.frame(Phi_1 = rep(0,4), Mean = rep(0,4), 
+                                St.dev = rep(0,4), 
                                 Quantile_5 = rep(0,4), 
-                                Median = rep(0,4), Quantile_95 = rep(0,4))
+                                Median = rep(0,4), 
+                                Quantile_95 = rep(0,4))
 
 for (i in 1:4){
   
   summary_alpha_mle[i,] <- c(paste("Phi1 = ", phi[i]), 
-                            round(mean(sim_results_T_200$alpha_mle_sim[[i]]$phi1), 4), 
-                            round(sd(sim_results_T_200$alpha_mle_sim[[i]]$phi1), 4),
-                            round(quantile(sim_results_T_200$alpha_mle_sim[[i]]$phi1, 0.05), 4),
-                            round(median(sim_results_T_200$alpha_mle_sim[[i]]$phi1), 4),
-                            round(quantile(sim_results_T_200$alpha_mle_sim[[i]]$phi1, 0.95), 4))
+                            round(mean(sim_results_T_200$
+                                         alpha_mle_sim[[i]]$phi1), 4), 
+                            round(sd(sim_results_T_200$
+                                       alpha_mle_sim[[i]]$phi1), 4),
+                            round(quantile(sim_results_T_200$
+                                             alpha_mle_sim[[i]]$phi1, 
+                                           0.05), 4),
+                            round(median(sim_results_T_200$
+                                           alpha_mle_sim[[i]]$phi1), 4),
+                            round(quantile(sim_results_T_200$
+                                             alpha_mle_sim[[i]]$phi1, 
+                                           0.95), 4))
 }
 
 # SUMMARY STATISTICS BETA MLE ESTIMATE
-summary_beta_mle <- data.frame(Phi_1 = rep(0,4), Mean = rep(0,4), St.dev = rep(0,4), 
+summary_beta_mle <- data.frame(Phi_1 = rep(0,4), Mean = rep(0,4), 
+                               St.dev = rep(0,4), 
                                 Quantile_5 = rep(0,4), 
-                                Median = rep(0,4), Quantile_95 = rep(0,4))
+                                Median = rep(0,4), 
+                               Quantile_95 = rep(0,4))
 
 for (i in 1:4){
   
   summary_beta_mle[i,] <- c(paste("Phi1 = ", phi[i]), 
-                             round(mean(sim_results_T_200$beta_mle_sim[[i]]$phi1), 4), 
-                             round(sd(sim_results_T_200$beta_mle_sim[[i]]$phi1), 4),
-                             round(quantile(sim_results_T_200$beta_mle_sim[[i]]$phi1, 0.05), 4),
-                             round(median(sim_results_T_200$beta_mle_sim[[i]]$phi1), 4),
-                             round(quantile(sim_results_T_200$beta_mle_sim[[i]]$phi1, 0.95), 4))
+                             round(mean(sim_results_T_200$
+                                          beta_mle_sim[[i]]$phi1), 4), 
+                             round(sd(sim_results_T_200$
+                                        beta_mle_sim[[i]]$phi1), 4),
+                             round(quantile(sim_results_T_200$
+                                              beta_mle_sim[[i]]$phi1, 
+                                            0.05), 4),
+                             round(median(sim_results_T_200$
+                                            beta_mle_sim[[i]]$phi1), 4),
+                             round(quantile(sim_results_T_200$
+                                              beta_mle_sim[[i]]$phi1, 
+                                            0.95), 4))
 }
 
 
-#sim_results_T_10 <- simulation(R = 500, T = 10)
-#sim_results_T_80 <- simulation(R = 500, T = 80)
-sim_results_T_320 <- simulation(R = 100, T = 320)
 
-successful_res_R200 <- sim_results_T_200
+###---- Graphs ---------------------------
 
-# Generating and saving the plots for T = 200
+## Generating and saving the plots for T = 200
+
+plot(density(sim_results_T_200$alpha_mle_sim$phi_0.5$phi1), 
+     type='l',
+     col='red', 
+     main="ML estimate of alpha")
+
+#add phi values to graph names or combine graphs
+# add xlab="X label", ylab="Y label" for labels
 
 jpeg('alpha_mle_for_phi0.5.jpg')
 plot(density(sim_results_T_200$alpha_mle_sim$phi_0.5$phi1))
@@ -415,3 +446,15 @@ qqline(sim_results_T_200$beta_mle_sim$phi_1$phi1)
 
 dev.off()
 
+###----Simulating other sample sizes----------------------------------
+
+#sim_results_T_10 <- simulation(R = 500, T = 10)
+#sim_results_T_80 <- simulation(R = 500, T = 80)
+#sim_results_T_320 <- simulation(R = 500, T = 320)
+
+##Saving results of simulations with all sample size
+
+#save(sim_results_T_10, sim_results_T_80, sim_results_T_200, 
+#     sim_results_T_320, file="simulation_results.RData")
+
+#load("simulation_results.RData")
