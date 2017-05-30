@@ -1,4 +1,5 @@
-install.packages("numDeriv")
+#install.packages("numDeriv")
+
 library(dplyr)
 
 ###-----Data Generating Process (DGP)---------------------------------
@@ -647,21 +648,25 @@ jpeg('qqplot_phi1_ols_for_phi0.5.jpg')
 qqnorm(sim_results_T_200$phi1_ols_sim$phi_0.5$phi1, 
        main = "OLS estimate of Phi 1 for phi1 = 0.5")
 qqline(sim_results_T_200$phi1_ols_sim$phi_0.5$phi1)
+dev.off()
 
 jpeg('qqplot_phi1_mle_for_phi0.5.jpg')
 qqnorm(sim_results_T_200$phi1_mle_sim$phi_0.5$phi1,
        main = "ML estimate of Phi 1 for phi1 = 0.5")
 qqline(sim_results_T_200$phi1_mle_sim$phi_0.5$phi1)
+dev.off()
 
 jpeg('qqplot_alpha_mle_for_phi0.5.jpg')
 qqnorm(sim_results_T_200$alpha_mle_sim$phi_0.5$phi1, 
        main = "ML estimate of alpha for phi1 = 0.5")
 qqline(sim_results_T_200$alpha_mle_sim$phi_0.5$phi1)
+dev.off()
 
 jpeg('qqplot_beta_mle_for_phi0.5.jpg')
 qqnorm(sim_results_T_200$beta_mle_sim$phi_0.5$phi1, 
        main = "ML estimate of alpha for phi1 = 0.5")
 qqline(sim_results_T_200$beta_mle_sim$phi_0.5$phi1)
+dev.off()
 
 # for phi1 = 0.9
 
@@ -669,21 +674,25 @@ jpeg('qqplot_phi1_ols_for_phi0.9.jpg')
 qqnorm(sim_results_T_200$phi1_ols_sim$phi_0.9$phi1, 
        main = "OLS estimate of Phi 1 for phi1 = 0.9")
 qqline(sim_results_T_200$phi1_ols_sim$phi_0.9$phi1)
+dev.off()
 
 jpeg('qqplot_phi1_mle_for_phi0.9.jpg')
 qqnorm(sim_results_T_200$phi1_mle_sim$phi_0.9$phi1, 
        main = "ML estimate of phi 1 for phi1 = 0.9")
 qqline(sim_results_T_200$phi1_mle_sim$phi_0.9$phi1)
+dev.off()
 
 jpeg('qqplot_alpha_mle_for_phi0.9.jpg')
 qqnorm(sim_results_T_200$alpha_mle_sim$phi_0.9$phi1, 
        main = "ML estimate of alpha for phi1 = 0.9")
 qqline(sim_results_T_200$alpha_mle_sim$phi_0.9$phi1)
+dev.off()
 
 jpeg('qqplot_beta_mle_for_phi0.9.jpg')
 qqnorm(sim_results_T_200$beta_mle_sim$phi_0.9$phi1, 
        main = "ML estimate of beta for phi1 = 0.9")
 qqline(sim_results_T_200$beta_mle_sim$phi_0.9$phi1)
+dev.off()
 
 # for phi1 = 0.99
 
@@ -691,21 +700,25 @@ jpeg('qqplot_phi1_ols_for_phi0.99.jpg')
 qqnorm(sim_results_T_200$phi1_ols_sim$phi_0.99$phi1, 
        main = "OLS estimate of Phi 1 for phi1 = 0.99")
 qqline(sim_results_T_200$phi1_ols_sim$phi_0.99$phi1)
+dev.off()
 
 jpeg('qqplot_phi1_mle_for_phi0.99.jpg')
 qqnorm(sim_results_T_200$phi1_mle_sim$phi_0.99$phi1, 
        main = "ML estimate of phi 1 for phi1 = 0.99")
 qqline(sim_results_T_200$phi1_mle_sim$phi_0.99$phi1)
+dev.off()
 
 jpeg('qqplot_alpha_mle_for_phi0.99.jpg')
 qqnorm(sim_results_T_200$alpha_mle_sim$phi_0.99$phi1, 
        main = "ML estimate of alpha for phi1 = 0.99")
 qqline(sim_results_T_200$alpha_mle_sim$phi_0.99$phi1)
+dev.off()
 
 jpeg('qqplot_beta_mle_for_phi0.99.jpg')
 qqnorm(sim_results_T_200$beta_mle_sim$phi_0.99$phi1, 
        main = "ML estimate of beta for phi1 = 0.99")
 qqline(sim_results_T_200$beta_mle_sim$phi_0.99$phi1)
+dev.off()
 
 # for phi1 = 1
 
@@ -713,21 +726,23 @@ jpeg('qqplot_phi1_ols_for_phi1.jpg')
 qqnorm(sim_results_T_200$phi1_ols_sim$phi_1$phi1, 
        main = "OLS estimate of Phi 1 for phi1 = 1")
 qqline(sim_results_T_200$phi1_ols_sim$phi_1$phi1)
+dev.off()
 
 jpeg('qqplot_phi1_mle_for_phi1.jpg')
 qqnorm(sim_results_T_200$phi1_mle_sim$phi_1$phi1, 
        main = "ML estimate of Phi 1 for phi1 = 1")
 qqline(sim_results_T_200$phi1_mle_sim$phi_1$phi1)
+dev.off()
 
 jpeg('qqplot_alpha_mle_for_phi1.jpg')
 qqnorm(sim_results_T_200$alpha_mle_sim$phi_1$phi1, 
        main = "ML estimate of alpha for phi1 = 1")
 qqline(sim_results_T_200$alpha_mle_sim$phi_1$phi1)
+dev.off()
 
 jpeg('qqplot_beta_mle_for_phi1.jpg')
 qqnorm(sim_results_T_200$beta_mle_sim$phi_1$phi1, 
        main = "ML estimate of beta for phi1 = 1")
 qqline(sim_results_T_200$beta_mle_sim$phi_1$phi1)
-
 dev.off()
 
