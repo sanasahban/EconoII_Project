@@ -314,39 +314,49 @@ for (i in 1:4){
 
 # Tables
 
+sample_size <- c(10, 80, 200, 320)
+
 # SUMMARY STATISTICS PHI 1 OLS ESTIMATE
-summary_phi1_ols <- data.frame(Phi_1 = rep(0,4), 
-                               Mean = rep(0,4), 
-                               St.dev = rep(0,4), 
-                               Mean_Bias = rep(0,4),
-                               RMSE = rep(0.4),
-                               Quantile_5 = rep(0,4), 
-                               Median = rep(0,4), 
-                               Quantile_95 = rep(0,4))
+summary_phi1_ols <- data.frame(Phi_1 = rep(0,16), 
+                               Sample_size = rep(0,16),
+                               Mean = rep(0,16), 
+                               St.dev = rep(0,16), 
+                               Mean_Bias = rep(0,16),
+                               RMSE = rep(0,16),
+                               Quantile_5 = rep(0,16), 
+                               Median = rep(0,16), 
+                               Quantile_95 = rep(0,16))
 
-for (i in 1:4){
+j <- NULL
 
-  summary_phi1_ols[i,] <- c(paste("Phi1 = ", phi[i]), 
-                            round(mean(sim_results_T_200$
-                                         phi1_ols_sim[[i]]$phi1), 4), 
-                            round(sd(sim_results_T_200$
-                                       phi1_ols_sim[[i]]$phi1), 4),
-                            round(mean(sim_results_T_200$
-                                         phi1_ols_sim[[i]]$phi1 - 
-                                         phi[i]), 4),
-                            round(sqrt(mean((sim_results_T_200$
-                                               phi1_ols_sim[[i]]$phi1 - 
-                                               phi[i]) ^ 2)), 4),
-                            round(quantile(sim_results_T_200$
-                                             phi1_ols_sim[[i]]$phi1, 
-                                           0.05), 4),
-                            round(median(sim_results_T_200$
-                                           phi1_ols_sim[[i]]$phi1), 4),
-                            round(quantile(sim_results_T_200$
-                                             phi1_ols_sim[[i]]$phi1, 
-                                           0.95), 4))
+for (t in 1:4){
+  ifelse(t == 1, j <- 1, ifelse(t == 2, j<-5, 
+                                ifelse(t == 3, j <- 9, j <- 13)))
+  
+  for (i in 1:4){
+    
+    summary_phi1_ols[j,] <- c(paste("Phi1 = ", phi[i]), sample_size[t],
+                              round(mean(sim_results_all[[t]]$
+                                           phi1_ols_sim[[i]]$phi1), 4), 
+                              round(sd(sim_results_all[[t]]$
+                                         phi1_ols_sim[[i]]$phi1), 4),
+                              round(mean(sim_results_all[[t]]$
+                                           phi1_ols_sim[[i]]$phi1 - 
+                                           phi[i]), 4),
+                              round(sqrt(mean((sim_results_all[[t]]$
+                                                 phi1_ols_sim[[i]]$phi1 - 
+                                                 phi[i]) ^ 2)), 4),
+                              round(quantile(sim_results_all[[t]]$
+                                               phi1_ols_sim[[i]]$phi1, 
+                                             0.05), 4),
+                              round(median(sim_results_all[[t]]$
+                                             phi1_ols_sim[[i]]$phi1), 4),
+                              round(quantile(sim_results_all[[t]]$
+                                               phi1_ols_sim[[i]]$phi1, 
+                                             0.95), 4))
+    j=j+1
+  }
 }
-
 # SUMMARY STATISTICS PHI 1 MLE ESTIMATE
 
 summary_phi1_mle <- data.frame(Phi_1 = rep(0,4), Mean = rep(0,4), 
@@ -449,117 +459,247 @@ for (i in 1:4){
 
 ## Generating and saving the plots for T = 200
 
-plot(density(sim_results_T_200$alpha_mle_sim$phi_0.5$phi1), 
-     type='l',
+# alpha ML
+
+y1 <- sim_results_T_200$alpha_mle_sim$phi_0.5$phi1
+y2 <- sim_results_T_200$alpha_mle_sim$phi_0.9$phi1
+y3 <- sim_results_T_200$alpha_mle_sim$phi_0.99$phi1
+y4 <- sim_results_T_200$alpha_mle_sim$phi_1$phi1
+
+xmax = 40
+ymax = 0.47
+
+jpeg('alpha_mle.jpg')
+
+plot(density(y1), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     type='l', xlab = "No. of Replications = 500",
      col='red', 
-     main="ML estimate of alpha")
+     main="Maximum Likelihood Estimate of alpha")
+par(new = TRUE)
+plot(density(y2), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', 
+     col='forestgreen', main = "")
+par(new = TRUE)
+plot(density(y3), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', 
+     col='darkblue', main = "")
+par(new = TRUE)
+plot(density(y4), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', col='violetred', main = "")
 
-#add phi values to graph names or combine graphs
-# add xlab="X label", ylab="Y label" for labels
+legend("topright", legend = c(paste("Phi_1 = ", phi[1:4])), 
+       col = c("red", "forestgreen", "darkblue", "violetred"), 
+       cex = 0.8, text.font = 4, lty = 1, y.intersp = 1, 
+       text.width = 20)
 
-jpeg('alpha_mle_for_phi0.5.jpg')
-plot(density(sim_results_T_200$alpha_mle_sim$phi_0.5$phi1))
-jpeg('beta_mle_for_phi0.5.jpg')
-plot(density(sim_results_T_200$beta_mle_sim$phi_0.5$phi1))
-jpeg('phi1_mle_for_phi0.5.jpg')
-plot(density(sim_results_T_200$phi1_mle_sim$phi_0.5$phi1))
-jpeg('phi1_ols_for_phi0.5.jpg')
-plot(density(sim_results_T_200$phi1_ols_sim$phi_0.5$phi1))
+dev.off()
 
-jpeg('alpha_mle_for_phi0.9.jpg')
-plot(density(sim_results_T_200$alpha_mle_sim$phi_0.9$phi1))
-jpeg('beta_mle_for_phi0.9.jpg')
-plot(density(sim_results_T_200$beta_mle_sim$phi_0.9$phi1))
-jpeg('phi1_mle_for_phi0.9.jpg')
-plot(density(sim_results_T_200$phi1_mle_sim$phi_0.9$phi1))
-jpeg('phi1_ols_for_phi0.9.jpg')
-plot(density(sim_results_T_200$phi1_ols_sim$phi_0.9$phi1))
+# beta ML
 
-jpeg('alpha_mle_for_phi0.99.jpg')
-plot(density(sim_results_T_200$alpha_mle_sim$phi_0.99$phi1))
-jpeg('beta_mle_for_phi0.99.jpg')
-plot(density(sim_results_T_200$beta_mle_sim$phi_0.99$phi1))
-jpeg('phi1_mle_for_phi0.99.jpg')
-plot(density(sim_results_T_200$phi1_mle_sim$phi_0.99$phi1))
-jpeg('phi1_ols_for_phi0.99.jpg')
-plot(density(sim_results_T_200$phi1_ols_sim$phi_0.99$phi1))
+y1 <- sim_results_T_200$beta_mle_sim$phi_0.5$phi1
+y2 <- sim_results_T_200$beta_mle_sim$phi_0.9$phi1
+y3 <- sim_results_T_200$beta_mle_sim$phi_0.99$phi1
+y4 <- sim_results_T_200$beta_mle_sim$phi_1$phi1
 
-jpeg('alpha_mle_for_phi1.jpg')
-plot(density(sim_results_T_200$alpha_mle_sim$phi_1$phi1))
-jpeg('beta_mle_for_phi1.jpg')
-plot(density(sim_results_T_200$beta_mle_sim$phi_1$phi1))
-jpeg('phi1_mle_for_phi1.jpg')
-plot(density(sim_results_T_200$phi1_mle_sim$phi_1$phi1))
-jpeg('phi1_ols_for_phi1.jpg')
-plot(density(sim_results_T_200$phi1_ols_sim$phi_1$phi1))
+xmax = 0.7
+ymax = 20
 
-# QQ PLOTS
+jpeg('beta_mle.jpg')
+
+plot(density(y1), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     type='l', xlab = "No. of Replications = 500",
+     col='red', 
+     main="Maximum Likelihood Estimate of beta")
+par(new = TRUE)
+plot(density(y2), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', 
+     col='forestgreen', main = "")
+par(new = TRUE)
+plot(density(y3), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', 
+     col='darkblue', main = "")
+par(new = TRUE)
+plot(density(y4), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', col='violetred', main = "")
+
+legend("topright", legend = c(paste("Phi_1 = ", phi[1:4])), 
+       col = c("red", "forestgreen", "darkblue", "violetred"), 
+       cex = 0.8, text.font = 4, lty = 1, y.intersp = 1, 
+       text.width = 0.3)
+
+dev.off()
+
+# phi1 ML
+
+y1 <- sim_results_T_200$phi1_mle_sim$phi_0.5$phi1
+y2 <- sim_results_T_200$phi1_mle_sim$phi_0.9$phi1
+y3 <- sim_results_T_200$phi1_mle_sim$phi_0.99$phi1
+y4 <- sim_results_T_200$phi1_mle_sim$phi_1$phi1
+
+xmax = 1
+ymax = 15
+
+jpeg('phi1_mle.jpg')
+
+plot(density(y1), ylim = c(0,ymax), xlim = c(0, xmax),
+     type='l', xlab = "No. of Replications = 500",
+     col='red', 
+     main="Maximum Likelihood Estimate of Phi 1")
+par(new = TRUE)
+plot(density(y2), ylim = c(0,ymax), xlim = c(0, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', 
+     col='forestgreen', main = "")
+par(new = TRUE)
+plot(density(y3), ylim = c(0,ymax), xlim = c(0, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', 
+     col='darkblue', main = "")
+par(new = TRUE)
+plot(density(y4), ylim = c(0,ymax), xlim = c(0, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', col='violetred', main = "")
+
+legend("topleft", legend = c(paste("Phi_1 = ", phi[1:4])), 
+       col = c("red", "forestgreen", "darkblue", "violetred"), 
+       cex = 0.8, text.font = 4, lty = 1, y.intersp = 1, 
+       text.width = 0.2)
+
+dev.off()
+
+# phi1 OLS
+
+y1 <- sim_results_T_200$phi1_ols_sim$phi_0.5$phi1
+y2 <- sim_results_T_200$phi1_ols_sim$phi_0.9$phi1
+y3 <- sim_results_T_200$phi1_ols_sim$phi_0.99$phi1
+y4 <- sim_results_T_200$phi1_ols_sim$phi_1$phi1
+
+xmax = 1
+ymax = 15
+
+jpeg('phi1_ols.jpg')
+
+plot(density(y1), ylim = c(0,ymax), xlim = c(0, xmax),
+     type='l', xlab = "No. of Replications = 500",
+     col='red', 
+     main="Ordinary Least Square Estimate of Phi 1")
+par(new = TRUE)
+plot(density(y2), ylim = c(0,ymax), xlim = c(0, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', 
+     col='forestgreen', main = "")
+par(new = TRUE)
+plot(density(y3), ylim = c(0,ymax), xlim = c(0, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', 
+     col='darkblue', main = "")
+par(new = TRUE)
+plot(density(y4), ylim = c(0,ymax), xlim = c(0, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', col='violetred', main = "")
+
+legend("topleft", legend = c(paste("Phi_1 = ", phi[1:4])), 
+       col = c("red", "forestgreen", "darkblue", "violetred"), 
+       cex = 0.8, text.font = 4, lty = 1, y.intersp = 1, 
+       text.width = 0.2)
+
+dev.off()
+
+
+###---- QQ plots ---------------------------
+
 # for phi1 = 0.5
+
 jpeg('qqplot_phi1_ols_for_phi0.5.jpg')
-qqnorm(sim_results_T_200$phi1_ols_sim$phi_0.5$phi1)
+qqnorm(sim_results_T_200$phi1_ols_sim$phi_0.5$phi1, 
+       main = "OLS estimate of Phi 1 for phi1 = 0.5")
 qqline(sim_results_T_200$phi1_ols_sim$phi_0.5$phi1)
 
 jpeg('qqplot_phi1_mle_for_phi0.5.jpg')
-qqnorm(sim_results_T_200$phi1_mle_sim$phi_0.5$phi1)
+qqnorm(sim_results_T_200$phi1_mle_sim$phi_0.5$phi1,
+       main = "ML estimate of Phi 1 for phi1 = 0.5")
 qqline(sim_results_T_200$phi1_mle_sim$phi_0.5$phi1)
 
 jpeg('qqplot_alpha_mle_for_phi0.5.jpg')
-qqnorm(sim_results_T_200$alpha_mle_sim$phi_0.5$phi1)
+qqnorm(sim_results_T_200$alpha_mle_sim$phi_0.5$phi1, 
+       main = "ML estimate of alpha for phi1 = 0.5")
 qqline(sim_results_T_200$alpha_mle_sim$phi_0.5$phi1)
 
 jpeg('qqplot_beta_mle_for_phi0.5.jpg')
-qqnorm(sim_results_T_200$beta_mle_sim$phi_0.5$phi1)
+qqnorm(sim_results_T_200$beta_mle_sim$phi_0.5$phi1, 
+       main = "ML estimate of alpha for phi1 = 0.5")
 qqline(sim_results_T_200$beta_mle_sim$phi_0.5$phi1)
 
 # for phi1 = 0.9
+
 jpeg('qqplot_phi1_ols_for_phi0.9.jpg')
-qqnorm(sim_results_T_200$phi1_ols_sim$phi_0.9$phi1)
+qqnorm(sim_results_T_200$phi1_ols_sim$phi_0.9$phi1, 
+       main = "OLS estimate of Phi 1 for phi1 = 0.9")
 qqline(sim_results_T_200$phi1_ols_sim$phi_0.9$phi1)
 
 jpeg('qqplot_phi1_mle_for_phi0.9.jpg')
-qqnorm(sim_results_T_200$phi1_mle_sim$phi_0.9$phi1)
+qqnorm(sim_results_T_200$phi1_mle_sim$phi_0.9$phi1, 
+       main = "ML estimate of phi 1 for phi1 = 0.9")
 qqline(sim_results_T_200$phi1_mle_sim$phi_0.9$phi1)
 
 jpeg('qqplot_alpha_mle_for_phi0.9.jpg')
-qqnorm(sim_results_T_200$alpha_mle_sim$phi_0.9$phi1)
+qqnorm(sim_results_T_200$alpha_mle_sim$phi_0.9$phi1, 
+       main = "ML estimate of alpha for phi1 = 0.9")
 qqline(sim_results_T_200$alpha_mle_sim$phi_0.9$phi1)
 
 jpeg('qqplot_beta_mle_for_phi0.9.jpg')
-qqnorm(sim_results_T_200$beta_mle_sim$phi_0.9$phi1)
+qqnorm(sim_results_T_200$beta_mle_sim$phi_0.9$phi1, 
+       main = "ML estimate of beta for phi1 = 0.9")
 qqline(sim_results_T_200$beta_mle_sim$phi_0.9$phi1)
 
 # for phi1 = 0.99
+
 jpeg('qqplot_phi1_ols_for_phi0.99.jpg')
-qqnorm(sim_results_T_200$phi1_ols_sim$phi_0.99$phi1)
+qqnorm(sim_results_T_200$phi1_ols_sim$phi_0.99$phi1, 
+       main = "OLS estimate of Phi 1 for phi1 = 0.99")
 qqline(sim_results_T_200$phi1_ols_sim$phi_0.99$phi1)
 
 jpeg('qqplot_phi1_mle_for_phi0.99.jpg')
-qqnorm(sim_results_T_200$phi1_mle_sim$phi_0.99$phi1)
+qqnorm(sim_results_T_200$phi1_mle_sim$phi_0.99$phi1, 
+       main = "ML estimate of phi 1 for phi1 = 0.99")
 qqline(sim_results_T_200$phi1_mle_sim$phi_0.99$phi1)
 
 jpeg('qqplot_alpha_mle_for_phi0.99.jpg')
-qqnorm(sim_results_T_200$alpha_mle_sim$phi_0.99$phi1)
+qqnorm(sim_results_T_200$alpha_mle_sim$phi_0.99$phi1, 
+       main = "ML estimate of alpha for phi1 = 0.99")
 qqline(sim_results_T_200$alpha_mle_sim$phi_0.99$phi1)
 
 jpeg('qqplot_beta_mle_for_phi0.99.jpg')
-qqnorm(sim_results_T_200$beta_mle_sim$phi_0.99$phi1)
+qqnorm(sim_results_T_200$beta_mle_sim$phi_0.99$phi1, 
+       main = "ML estimate of beta for phi1 = 0.99")
 qqline(sim_results_T_200$beta_mle_sim$phi_0.99$phi1)
 
 # for phi1 = 1
+
 jpeg('qqplot_phi1_ols_for_phi1.jpg')
-qqnorm(sim_results_T_200$phi1_ols_sim$phi_1$phi1)
+qqnorm(sim_results_T_200$phi1_ols_sim$phi_1$phi1, 
+       main = "OLS estimate of Phi 1 for phi1 = 1")
 qqline(sim_results_T_200$phi1_ols_sim$phi_1$phi1)
 
 jpeg('qqplot_phi1_mle_for_phi1.jpg')
-qqnorm(sim_results_T_200$phi1_mle_sim$phi_1$phi1)
+qqnorm(sim_results_T_200$phi1_mle_sim$phi_1$phi1, 
+       main = "ML estimate of Phi 1 for phi1 = 1")
 qqline(sim_results_T_200$phi1_mle_sim$phi_1$phi1)
 
 jpeg('qqplot_alpha_mle_for_phi1.jpg')
-qqnorm(sim_results_T_200$alpha_mle_sim$phi_1$phi1)
+qqnorm(sim_results_T_200$alpha_mle_sim$phi_1$phi1, 
+       main = "ML estimate of alpha for phi1 = 1")
 qqline(sim_results_T_200$alpha_mle_sim$phi_1$phi1)
 
 jpeg('qqplot_beta_mle_for_phi1.jpg')
-qqnorm(sim_results_T_200$beta_mle_sim$phi_1$phi1)
+qqnorm(sim_results_T_200$beta_mle_sim$phi_1$phi1, 
+       main = "ML estimate of beta for phi1 = 1")
 qqline(sim_results_T_200$beta_mle_sim$phi_1$phi1)
 
 dev.off()
