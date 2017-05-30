@@ -746,3 +746,4 @@ qqnorm(sim_results_T_200$beta_mle_sim$phi_1$phi1,
 qqline(sim_results_T_200$beta_mle_sim$phi_1$phi1)
 dev.off()
 
+# The end
