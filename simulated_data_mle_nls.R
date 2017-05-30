@@ -312,6 +312,10 @@ for (i in 1:4){
 #sim_results_T_200 <- simulation(R = 500, T = 200)
 #Results have been saved use load("simulation_results.RData") to load
 
+#load("simulation_results.RData")
+sim_results_all <- list(sim_results_T_10, sim_results_T_80, 
+                        sim_results_T_200, sim_results_T_320)
+
 # Tables
 
 sample_size <- c(10, 80, 200, 320)
@@ -325,7 +329,8 @@ summary_phi1_ols <- data.frame(Phi_1 = rep(0,16),
                                RMSE = rep(0,16),
                                Quantile_5 = rep(0,16), 
                                Median = rep(0,16), 
-                               Quantile_95 = rep(0,16))
+                               Quantile_95 = rep(0,16),
+                               asymptotic_var = rep(0,16))
 
 j <- NULL
 
@@ -335,124 +340,135 @@ for (t in 1:4){
   
   for (i in 1:4){
     
+    sim_res <- sim_results_all[[t]]$phi1_ols_sim[[i]]$phi1
+    
     summary_phi1_ols[j,] <- c(paste("Phi1 = ", phi[i]), sample_size[t],
-                              round(mean(sim_results_all[[t]]$
-                                           phi1_ols_sim[[i]]$phi1), 4), 
-                              round(sd(sim_results_all[[t]]$
-                                         phi1_ols_sim[[i]]$phi1), 4),
-                              round(mean(sim_results_all[[t]]$
-                                           phi1_ols_sim[[i]]$phi1 - 
-                                           phi[i]), 4),
-                              round(sqrt(mean((sim_results_all[[t]]$
-                                                 phi1_ols_sim[[i]]$phi1 - 
-                                                 phi[i]) ^ 2)), 4),
-                              round(quantile(sim_results_all[[t]]$
-                                               phi1_ols_sim[[i]]$phi1, 
-                                             0.05), 4),
-                              round(median(sim_results_all[[t]]$
-                                             phi1_ols_sim[[i]]$phi1), 4),
-                              round(quantile(sim_results_all[[t]]$
-                                               phi1_ols_sim[[i]]$phi1, 
-                                             0.95), 4))
+                              round(mean(sim_res), 4), 
+                              round(sd(sim_res), 4),
+                              round(mean(sim_res - phi[i]), 4),
+                              round(sqrt(mean((sim_res) ^ 2)), 4),
+                              round(quantile(sim_res, 0.05), 4),
+                              round(median(sim_res), 4),
+                              round(quantile(sim_res, 0.95), 4),
+                              round(var(sqrt(sample_size[t]) * 
+                                      (sim_res - phi[i])), 4))
     j=j+1
   }
 }
+
 # SUMMARY STATISTICS PHI 1 MLE ESTIMATE
 
-summary_phi1_mle <- data.frame(Phi_1 = rep(0,4), Mean = rep(0,4), 
-                               St.dev = rep(0,4), 
-                               Mean_Bias = rep(0,4),
-                               RMSE = rep(0.4),
-                               Quantile_5 = rep(0,4), 
-                               Median = rep(0,4), 
-                               Quantile_95 = rep(0,4))
+summary_phi1_mle <- data.frame(Phi_1 = rep(0,16), 
+                               Sample_size = rep(0,16),
+                               Mean = rep(0,16), 
+                               St.dev = rep(0,16), 
+                               Mean_Bias = rep(0,16),
+                               RMSE = rep(0,16),
+                               Quantile_5 = rep(0,16), 
+                               Median = rep(0,16), 
+                               Quantile_95 = rep(0,16),
+                               asymptotic_var = rep(0,16))
 
-for (i in 1:4){
+j <- NULL
+
+for (t in 1:4){
+  ifelse(t == 1, j <- 1, ifelse(t == 2, j<-5, 
+                                ifelse(t == 3, j <- 9, j <- 13)))
   
-  summary_phi1_mle[i,] <- c(paste("Phi1 = ", phi[i]), 
-                            round(mean(sim_results_T_200$
-                                         phi1_mle_sim[[i]]$phi1), 4), 
-                            round(sd(sim_results_T_200$
-                                       phi1_mle_sim[[i]]$phi1), 4),
-                            round(mean(sim_results_T_200$
-                                         phi1_mle_sim[[i]]$phi1 - 
-                                         phi[i]), 4),
-                            round(sqrt(mean((sim_results_T_200$
-                                               phi1_mle_sim[[i]]$phi1 - 
-                                               phi[i]) ^ 2)), 4),
-                            round(quantile(sim_results_T_200$
-                                             phi1_mle_sim[[i]]$phi1, 
-                                           0.05), 4),
-                            round(median(sim_results_T_200$
-                                           phi1_mle_sim[[i]]$phi1), 4),
-                            round(quantile(sim_results_T_200$
-                                             phi1_mle_sim[[i]]$phi1, 
-                                           0.95), 4))
+  for (i in 1:4){
+    
+    sim_res <- sim_results_all[[t]]$phi1_mle_sim[[i]]$phi1
+    
+    summary_phi1_mle[j,] <- c(paste("Phi1 = ", phi[i]), sample_size[t],
+                              round(mean(sim_res), 4), 
+                              round(sd(sim_res), 4),
+                              round(mean(sim_res - phi[i]), 4),
+                              round(sqrt(mean((sim_res) ^ 2)), 4),
+                              round(quantile(sim_res, 0.05), 4),
+                              round(median(sim_res), 4),
+                              round(quantile(sim_res, 0.95), 4),
+                              round(var(sqrt(sample_size[t]) * 
+                                          (sim_res - phi[i])), 4))
+    j=j+1
+  }
 }
+
 
 # SUMMARY STATISTICS ALPHA MLE ESTIMATE
-summary_alpha_mle <- data.frame(Phi_1 = rep(0,4), Mean = rep(0,4), 
-                                St.dev = rep(0,4), 
-                                Mean_Bias = rep(0,4),
-                                RMSE = rep(0.4),
-                                Quantile_5 = rep(0,4), 
-                                Median = rep(0,4), 
-                                Quantile_95 = rep(0,4))
 
-for (i in 1:4){
+summary_alpha_mle <- data.frame(Phi_1 = rep(0,16), 
+                               Sample_size = rep(0,16),
+                               Mean = rep(0,16), 
+                               St.dev = rep(0,16), 
+                               Mean_Bias = rep(0,16),
+                               RMSE = rep(0,16),
+                               Quantile_5 = rep(0,16), 
+                               Median = rep(0,16), 
+                               Quantile_95 = rep(0,16),
+                               asymptotic_var = rep(0,16))
+
+j <- NULL
+
+for (t in 1:4){
+  ifelse(t == 1, j <- 1, ifelse(t == 2, j<-5, 
+                                ifelse(t == 3, j <- 9, j <- 13)))
   
-  summary_alpha_mle[i,] <- c(paste("Phi1 = ", phi[i]), 
-                            round(mean(sim_results_T_200$
-                                         alpha_mle_sim[[i]]$phi1), 4), 
-                            round(sd(sim_results_T_200$
-                                       alpha_mle_sim[[i]]$phi1), 4),
-                            round(mean(sim_results_T_200$
-                                         alpha_mle_sim[[i]]$phi1 - 
-                                         phi[i]), 4),
-                            round(sqrt(mean((sim_results_T_200$
-                                               alpha_mle_sim[[i]]$phi1 - 
-                                               phi[i]) ^ 2)), 4),
-                            round(quantile(sim_results_T_200$
-                                             alpha_mle_sim[[i]]$phi1, 
-                                           0.05), 4),
-                            round(median(sim_results_T_200$
-                                           alpha_mle_sim[[i]]$phi1), 4),
-                            round(quantile(sim_results_T_200$
-                                             alpha_mle_sim[[i]]$phi1, 
-                                           0.95), 4))
+  for (i in 1:4){
+    
+    sim_res <- sim_results_all[[t]]$alpha_mle_sim[[i]]$phi1
+    
+    summary_alpha_mle[j,] <- c(paste("Phi1 = ", phi[i]), sample_size[t],
+                              round(mean(sim_res), 4), 
+                              round(sd(sim_res), 4),
+                              round(mean(sim_res - phi[i]), 4),
+                              round(sqrt(mean((sim_res) ^ 2)), 4),
+                              round(quantile(sim_res, 0.05), 4),
+                              round(median(sim_res), 4),
+                              round(quantile(sim_res, 0.95), 4),
+                              round(var(sqrt(sample_size[t]) * 
+                                          (sim_res - phi[i])), 4))
+    j=j+1
+  }
 }
+
 
 # SUMMARY STATISTICS BETA MLE ESTIMATE
-summary_beta_mle <- data.frame(Phi_1 = rep(0,4), Mean = rep(0,4), 
-                               St.dev = rep(0,4), 
-                               Mean_Bias = rep(0,4),
-                               RMSE = rep(0.4),
-                               Quantile_5 = rep(0,4), 
-                               Median = rep(0,4), 
-                               Quantile_95 = rep(0,4))
 
-for (i in 1:4){
+summary_beta_mle <- data.frame(Phi_1 = rep(0,16), 
+                               Sample_size = rep(0,16),
+                               Mean = rep(0,16), 
+                               St.dev = rep(0,16), 
+                               Mean_Bias = rep(0,16),
+                               RMSE = rep(0,16),
+                               Quantile_5 = rep(0,16), 
+                               Median = rep(0,16), 
+                               Quantile_95 = rep(0,16),
+                               asymptotic_var = rep(0,16))
+
+j <- NULL
+
+for (t in 1:4){
+  ifelse(t == 1, j <- 1, ifelse(t == 2, j<-5, 
+                                ifelse(t == 3, j <- 9, j <- 13)))
   
-  summary_beta_mle[i,] <- c(paste("Phi1 = ", phi[i]), 
-                             round(mean(sim_results_T_200$
-                                          beta_mle_sim[[i]]$phi1), 4), 
-                             round(sd(sim_results_T_200$
-                                        beta_mle_sim[[i]]$phi1), 4),
-                            round(mean(sim_results_T_200$
-                                         beta_mle_sim[[i]]$phi1 - 
-                                         phi[i]), 4),
-                            round(sqrt(mean((sim_results_T_200$
-                                               beta_mle_sim[[i]]$phi1 - 
-                                               phi[i]) ^ 2)), 4),
-                            round(quantile(sim_results_T_200$
-                                             beta_mle_sim[[i]]$phi1, 
-                                           0.05), 4),
-                            round(median(sim_results_T_200$
-                                           beta_mle_sim[[i]]$phi1), 4),
-                            round(quantile(sim_results_T_200$
-                                             beta_mle_sim[[i]]$phi1, 
-                                           0.95), 4))
+  for (i in 1:4){
+    
+    sim_res <- sim_results_all[[t]]$beta_mle_sim[[i]]$phi1
+    
+    summary_beta_mle[j,] <- c(paste("Phi1 = ", phi[i]), sample_size[t],
+                              round(mean(sim_res), 4), 
+                              round(sd(sim_res), 4),
+                              round(mean(sim_res - phi[i]), 4),
+                              round(sqrt(mean((sim_res) ^ 2)), 4),
+                              round(quantile(sim_res, 0.05), 4),
+                              round(median(sim_res), 4),
+                              round(quantile(sim_res, 0.95), 4),
+                              round(var(sqrt(sample_size[t]) * 
+                                          (sim_res - phi[i])), 4))
+    j=j+1
+  }
 }
+
 
 
 ###---- Graphs ---------------------------
