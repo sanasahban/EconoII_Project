@@ -307,12 +307,22 @@ for (i in 1:4){
   
 }
 
-# 3.2.3
 
+
+###----3.2.3----------------------------------
+
+##Saving results of simulations with all sample size
+#sim_results_T_10 <- simulation(R = 500, T = 10)
+#sim_results_T_80 <- simulation(R = 500, T = 80)
 #sim_results_T_200 <- simulation(R = 500, T = 200)
+#sim_results_T_320 <- simulation(R = 500, T = 320)
+
+#save(sim_results_T_10, sim_results_T_80, sim_results_T_200, 
+#     sim_results_T_320, file="simulation_results.RData")
+
 #Results have been saved use load("simulation_results.RData") to load
 
-#load("simulation_results.RData")
+load("simulation_results.RData")
 sim_results_all <- list(sim_results_T_10, sim_results_T_80, 
                         sim_results_T_200, sim_results_T_320)
 
@@ -720,15 +730,3 @@ qqline(sim_results_T_200$beta_mle_sim$phi_1$phi1)
 
 dev.off()
 
-###----Simulating other sample sizes----------------------------------
-
-#sim_results_T_10 <- simulation(R = 500, T = 10)
-#sim_results_T_80 <- simulation(R = 500, T = 80)
-#sim_results_T_320 <- simulation(R = 500, T = 320)
-
-##Saving results of simulations with all sample size
-
-#save(sim_results_T_10, sim_results_T_80, sim_results_T_200, 
-#     sim_results_T_320, file="simulation_results.RData")
-
-#load("simulation_results.RData")
