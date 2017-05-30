@@ -187,7 +187,7 @@ loglikelihood <- function(theta, data){
   )
 }
 
-mle <- function(loglikelihood, score, data, ols_est){
+mle <- function(loglikelihood, data, ols_est){
     
   ## Use OLS for initial conditions
   theta <- c(ols_est$phi1_ols$coefficient, ols_est$beta_ols$coefficient, 
@@ -224,5 +224,5 @@ mle <- function(loglikelihood, score, data, ols_est){
   
 }
 
-mle_est <- mle(loglikelihood, score, data, ols_est)
+mle_est <- mle(loglikelihood, data, ols_est)
 

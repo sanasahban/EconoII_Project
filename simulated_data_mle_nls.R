@@ -84,7 +84,7 @@ loglikelihood <- function(theta, data){
 }
 
 
-mle <- function(loglikelihood, score, data, ols_est){
+mle <- function(loglikelihood, data, ols_est){
   
   ## Use OLS for initial conditions
   theta <- c(ols_est$phi1_ols$coefficient, ols_est$beta_ols$coefficient, 
@@ -93,13 +93,14 @@ mle <- function(loglikelihood, score, data, ols_est){
   ## Optimisation [using ols estimates as initial conditions]
   mle <- optim(par = theta, 
                fn = loglikelihood, data = data, 
-               method = "BFGS", hessian = TRUE)
+               method = "BFGS")
   
   r_theta <- matrix(
     c(2 * exp(mle$par[1])/(exp(mle$par[1]) + 1) ^ 2, rep(0,4), 1, 
     rep(0,4), 1, rep(0,4), exp(mle$par[4])), 4, 4
   )
   
+  library(numDeriv)
   hessian <- hessian(func = loglikelihood, x = mle$par, data = data)
   
   # covariance matrix using delta method
@@ -194,8 +195,8 @@ simulation <- function(R, T){
       
       
       ## MLE
-      mle_est <- mle(loglikelihood = loglikelihood, score = score, 
-                     data = data, ols_est = ols_est)
+      mle_est <- mle(loglikelihood = loglikelihood, data = data, 
+                     ols_est = ols_est)
       
       # Saving MLE estimate of alpha
       alpha_mle_sim[[i]]$phi1[r] <- mle_est$beta_mle$coefficient[1] 
@@ -222,8 +223,93 @@ simulation <- function(R, T){
 }
 
 ###---- Sample  200: tables & graphs ---------------------------
+# 3.2.1
 
-#sim_results_T_200 <- simulation(R = 500, T = 200)
+T = 100
+
+phi1_ols_3.2 <- data.frame(Phi_1 = rep(0,4), coefficient = rep(0,4), 
+                           st.dev = rep(0,4), t_stat = rep(0,4))
+phi1_mle_3.2 <- data.frame(Phi_1 = rep(0,4), coefficient = rep(0,4), 
+                           st.dev = rep(0,4), t_stat = rep(0,4))
+alpha_mle_3.2 <- data.frame(Phi_1 = rep(0,4), coefficient = rep(0,4), 
+                           st.dev = rep(0,4), t_stat = rep(0,4))
+beta_mle_3.2 <- data.frame(Phi_1 = rep(0,4), coefficient = rep(0,4), 
+                           st.dev = rep(0,4), t_stat = rep(0,4))
+
+for (i in 1:4){
+  
+  phi1 <- phi[i] # defining value of phi1
+  
+  for (r in 1:2){
+    
+    ## Replications of data
+    data <- data.frame(epsilon = rnorm(T, mean = mean_e, 
+                                       sd = sigma_e), 
+                       i = rep(1,T), t = 1:T)
+    
+    y <- NULL
+    
+    for (t in 1:T) {
+      ifelse(t == 1,
+             ifelse(abs(phi1) < 1, 
+                    y[t] <- rnorm(1, mean = 0, 
+                                  sd = sqrt((sigma_e^2)/(1-phi1^2))),
+                    y[t] <- c(phi1 * y0 + data$epsilon[t])),
+             y[t] <- c(phi1 * y[as.numeric(t - 1)] + data$epsilon[t]))
+    }
+    
+    data <- data.frame(data, y)
+    
+    # calcuating first lags of dependant and independant variables
+    
+    data <- data %>% 
+      dplyr::mutate(ilag1 = lag(i), tlag1 = lag(t), ylag1 = lag(y))
+    
+    mypath <- file.path(paste("yt_r_", r, "_phi1_", phi[i],".jpeg", sep = ""))
+    jpeg(file = mypath)
+    plot(data$t, data$y, xlab = "t", ylab = "yt",
+         main = paste("Scatterplot: yt for phi1 = ", phi[i]))
+    dev.off()
+    
+    # 3.2.2
+    
+    # OLS estimation using or function
+    ols_est <- ols(depvar = data$y, indvar = data$t, res = TRUE)
+    phi1_ols <- ols(depvar = ols_est$residuals_ols$res[-1], 
+                    indvar = ols_est$residuals_ols$res_lag1[-1], 
+                    res = FALSE)
+    ols_est <- list(beta_ols = ols_est$estimates, 
+                    phi1_ols = phi1_ols$estimates[2,], 
+                    sigma_e2_ols = ols_est$sigma_e2_ols)
+    
+    # MLE estimation using our function
+    mle_est <- mle(loglikelihood = loglikelihood, data = data, 
+                   ols_est = ols_est)
+  }
+  
+  # Saving the results for second replication
+  phi1_ols_3.2[i,] <- c(paste("Phi1 = ", phi[i]),
+                        round(phi1_ols$estimates$coefficient[2], 4), 
+                        round(phi1_ols$estimates$st.error[2], 4), 
+                        round(phi1_ols$estimates$t_stat[2], 4))
+  phi1_mle_3.2[i,] <- c(paste("Phi1 = ", phi[i]),
+                        round(mle_est$phi1_mle$coefficient[1], 4), 
+                        round(mle_est$phi1_mle$st.error[1], 4), 
+                        round(mle_est$phi1_mle$t_stat[1], 4))
+  alpha_mle_3.2[i,] <- c(paste("Phi1 = ", phi[i]),
+                         round(mle_est$beta_mle$coefficient[1], 4), 
+                         round(mle_est$beta_mle$st.error[1], 4), 
+                         round(mle_est$beta_mle$t_stat[1], 4))
+  beta_mle_3.2[i,] <- c(paste("Phi1 = ", phi[i]),
+                        round(mle_est$beta_mle$coefficient[2], 4), 
+                        round(mle_est$beta_mle$st.error[2], 4), 
+                        round(mle_est$beta_mle$t_stat[2], 4))
+  
+}
+
+# 3.2.3
+
+sim_results_T_200 <- simulation(R = 500, T = 200)
 #Results have been saved use load("simulation_results.RData") to load
 
 # Tables
