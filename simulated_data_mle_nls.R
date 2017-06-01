@@ -224,7 +224,7 @@ simulation <- function(R, T){
               phi1_mle_sim = phi1_mle_sim))
 }
 
-###---- Sample  200: tables & graphs ---------------------------
+###---- Sample  100: Tables and Graphs ---------------------------
 # 3.2.1
 
 T = 100
@@ -309,9 +309,10 @@ for (i in 1:4){
   
 }
 
+Table_2 <- list(alpha_mle = alpha_mle_3.2, beta_mle = beta_mle_3.2, 
+                phi1_mle = phi1_mle_3.2, phi1_ols = phi1_ols_3.2)
 
-
-###----3.2.3 Tables----------------------------------
+###----3.2.3 Simulation Tables---------------------------------------------------
 
 ##Saving results of simulations with all sample size
 #sim_results_T_10 <- simulation(R = 500, T = 10)
@@ -489,7 +490,10 @@ for (t in 1:4){
   }
 }
 
-
+Table_3 <- list(alpha_mle = summary_alpha_mle, 
+                beta_mle = summary_beta_mle, 
+                phi1_mle = summary_phi1_mle, 
+                phi1_ols = summary_phi1_ols)
 
 ###---- 3.2.3 Graphs ---------------------------
 
