@@ -500,7 +500,7 @@ ymax = 0.47
 jpeg('alpha_mle.jpg')
 
 plot(density(y1), ylim = c(0,ymax), xlim = c(-xmax, xmax),
-     type='l', xlab = "No. of Replications = 500",
+     type='l', xlab = "No. of Replications = 500, Sample Size = 200",
      col='red', 
      main="Maximum Likelihood Estimate of alpha")
 par(new = TRUE)
@@ -538,7 +538,7 @@ ymax = 20
 jpeg('beta_mle.jpg')
 
 plot(density(y1), ylim = c(0,ymax), xlim = c(-xmax, xmax),
-     type='l', xlab = "No. of Replications = 500",
+     type='l', xlab = "No. of Replications = 500, Sample Size = 200",
      col='red', 
      main="Maximum Likelihood Estimate of beta")
 par(new = TRUE)
@@ -576,7 +576,7 @@ ymax = 15
 jpeg('phi1_mle.jpg')
 
 plot(density(y1), ylim = c(0,ymax), xlim = c(0, xmax),
-     type='l', xlab = "No. of Replications = 500",
+     type='l', xlab = "No. of Replications = 500, Sample Size = 200",
      col='red', 
      main="Maximum Likelihood Estimate of Phi 1")
 par(new = TRUE)
@@ -614,7 +614,7 @@ ymax = 15
 jpeg('phi1_ols.jpg')
 
 plot(density(y1), ylim = c(0,ymax), xlim = c(0, xmax),
-     type='l', xlab = "No. of Replications = 500",
+     type='l', xlab = "No. of Replications = 500, Sample Size = 200",
      col='red', 
      main="Ordinary Least Square Estimate of Phi 1")
 par(new = TRUE)
@@ -639,6 +639,627 @@ legend("topleft", legend = c(paste("Phi_1 = ", phi[1:4])),
 
 dev.off()
 
+###---- Graphs for all sample sizes ---------------------------
+
+#Phi1 = 0.5
+# alpha ML
+
+y1 <- sqrt(10) * (sim_results_T_10$alpha_mle_sim$phi_0.5$phi1 - 0)
+y2 <- sqrt(80) * (sim_results_T_80$alpha_mle_sim$phi_0.5$phi1 - 0)
+y3 <- sqrt(200) * (sim_results_T_200$alpha_mle_sim$phi_0.5$phi1 - 0)
+y4 <- sqrt(320) * (sim_results_T_320$alpha_mle_sim$phi_0.5$phi1 - 0)
+
+xmax = 40
+ymax = 0.05
+
+png('alpha_mle_finite_sample_phi_0.5.jpg', width = 600, height = 600)
+
+plot(density(y1), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     type='l', xlab = "No. of Replications = 500, Phi 1 = 0.5",
+     col='red', lty = 1,
+     main="ML estimate of alpha for different sample sizes")
+par(new = TRUE)
+plot(density(y2), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1, 
+     col='forestgreen', main = "")
+par(new = TRUE)
+plot(density(y3), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1,
+     col='darkblue', main = "")
+par(new = TRUE)
+plot(density(y4), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "", lty = 1, 
+     type='l', col='sienna4', main = "")
+
+legend("topright", legend = c(paste("Sample size = ", sample_size[1:4])),
+       col = c("red", "forestgreen", "darkblue", "sienna4"),
+       cex = 0.8, text.font = 4, lty = 1, y.intersp = 1,
+       text.width = 18)
+
+dev.off()
+
+# Beta ML
+
+y1 <- sqrt(10) * (sim_results_T_10$beta_mle_sim$phi_0.5$phi1 - 0)
+y2 <- sqrt(80) * (sim_results_T_80$beta_mle_sim$phi_0.5$phi1 - 0)
+y3 <- sqrt(200) * (sim_results_T_200$beta_mle_sim$phi_0.5$phi1 - 0)
+y4 <- sqrt(320) * (sim_results_T_320$beta_mle_sim$phi_0.5$phi1 - 0)
+
+xmax = 5
+ymax = 6.2
+
+png('beta_mle_finite_sample_phi_0.5.jpg', width = 600, height = 600)
+
+plot(density(y1), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     type='l', xlab = "No. of Replications = 500, Phi 1 = 0.5",
+     col='red', lty = 1,
+     main="ML estimate of beta for different sample sizes")
+par(new = TRUE)
+plot(density(y2), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1, 
+     col='forestgreen', main = "")
+par(new = TRUE)
+plot(density(y3), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1,
+     col='darkblue', main = "")
+par(new = TRUE)
+plot(density(y4), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "", lty = 1, 
+     type='l', col='sienna4', main = "")
+
+legend("topright", legend = c(paste("Sample size = ", sample_size[1:4])),
+       col = c("red", "forestgreen", "darkblue", "sienna4"),
+       cex = 0.8, text.font = 4, lty = 1, y.intersp = 1,
+       text.width = 3)
+
+dev.off()
+
+# phi1 ML
+
+y1 <- sqrt(10) * (sim_results_T_10$phi1_mle_sim$phi_0.5$phi1 - 0.5)
+y2 <- sqrt(80) * (sim_results_T_80$phi1_mle_sim$phi_0.5$phi1 - 0.5)
+y3 <- sqrt(200) * (sim_results_T_200$phi1_mle_sim$phi_0.5$phi1 - 0.5)
+y4 <- sqrt(320) * (sim_results_T_320$phi1_mle_sim$phi_0.5$phi1 - 0.5)
+
+xmin = -5
+xmax = 2
+ymax = 0.55
+
+png('phi1_mle_finite_sample_phi_0.5.jpg', width = 600, height = 600)
+
+plot(density(y1), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     type='l', xlab = "No. of Replications = 500, Phi 1 = 0.5",
+     col='red', lty = 1,
+     main="ML estimate of phi 1 for different sample sizes")
+par(new = TRUE)
+plot(density(y2), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1, 
+     col='forestgreen', main = "")
+par(new = TRUE)
+plot(density(y3), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1,
+     col='darkblue', main = "")
+par(new = TRUE)
+plot(density(y4), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "", lty = 1, 
+     type='l', col='sienna4', main = "")
+
+legend("topleft", legend = c(paste("Sample size = ", sample_size[1:4])),
+       col = c("red", "forestgreen", "darkblue", "sienna4"),
+       cex = 0.8, text.font = 4, lty = 1, y.intersp = 1,
+       text.width = 2)
+
+dev.off()
+
+# phi1 OLS
+
+y1 <- sqrt(10) * (sim_results_T_10$phi1_ols_sim$phi_0.5$phi1 - 0.5)
+y2 <- sqrt(80) * (sim_results_T_80$phi1_ols_sim$phi_0.5$phi1 - 0.5)
+y3 <- sqrt(200) * (sim_results_T_200$phi1_ols_sim$phi_0.5$phi1 - 0.5)
+y4 <- sqrt(320) * (sim_results_T_320$phi1_ols_sim$phi_0.5$phi1 - 0.5)
+
+xmin = -5
+xmax = 2
+ymax = 0.52
+
+png('phi1_ols_finite_sample_phi_0.5.jpg', width = 600, height = 600)
+
+plot(density(y1), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     type='l', xlab = "No. of Replications = 500, Phi 1 = 0.5",
+     col='red', lty = 1,
+     main="OLS estimate of phi 1 for different sample sizes")
+par(new = TRUE)
+plot(density(y2), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1, 
+     col='forestgreen', main = "")
+par(new = TRUE)
+plot(density(y3), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1,
+     col='darkblue', main = "")
+par(new = TRUE)
+plot(density(y4), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "", lty = 1, 
+     type='l', col='sienna4', main = "")
+
+legend("topleft", legend = c(paste("Sample size = ", sample_size[1:4])),
+       col = c("red", "forestgreen", "darkblue", "sienna4"),
+       cex = 0.8, text.font = 4, lty = 1, y.intersp = 1,
+       text.width = 2)
+
+dev.off()
+
+#Phi1 = 0.9
+# alpha ML
+
+y1 <- sqrt(10) * (sim_results_T_10$alpha_mle_sim$phi_0.9$phi1 - 0)
+y2 <- sqrt(80) * (sim_results_T_80$alpha_mle_sim$phi_0.9$phi1 - 0)
+y3 <- sqrt(200) * (sim_results_T_200$alpha_mle_sim$phi_0.9$phi1 - 0)
+y4 <- sqrt(320) * (sim_results_T_320$alpha_mle_sim$phi_0.9$phi1 - 0)
+
+xmax = 160
+ymax = 0.015
+
+png('alpha_mle_finite_sample_phi_0.9.jpg', width = 600, height = 600)
+
+plot(density(y1), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     type='l', xlab = "No. of Replications = 500, Phi 1 = 0.9",
+     col='red', lty = 1,
+     main="ML estimate of alpha for different sample sizes")
+par(new = TRUE)
+plot(density(y2), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1, 
+     col='forestgreen', main = "")
+par(new = TRUE)
+plot(density(y3), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1,
+     col='darkblue', main = "")
+par(new = TRUE)
+plot(density(y4), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "", lty = 1, 
+     type='l', col='sienna4', main = "")
+
+legend("topright", legend = c(paste("Sample size = ", sample_size[1:4])),
+       col = c("red", "forestgreen", "darkblue", "sienna4"),
+       cex = 0.8, text.font = 4, lty = 1, y.intersp = 1,
+       text.width = 70)
+
+dev.off()
+
+# Beta ML
+
+y1 <- sqrt(10) * (sim_results_T_10$beta_mle_sim$phi_0.9$phi1 - 0)
+y2 <- sqrt(80) * (sim_results_T_80$beta_mle_sim$phi_0.9$phi1 - 0)
+y3 <- sqrt(200) * (sim_results_T_200$beta_mle_sim$phi_0.9$phi1 - 0)
+y4 <- sqrt(320) * (sim_results_T_320$beta_mle_sim$phi_0.9$phi1 - 0)
+
+xmax = 7
+ymax = 1.5
+
+png('beta_mle_finite_sample_phi_0.9.jpg', width = 600, height = 600)
+
+plot(density(y1), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     type='l', xlab = "No. of Replications = 500, Phi 1 = 0.9",
+     col='red', lty = 1,
+     main="ML estimate of beta for different sample sizes")
+par(new = TRUE)
+plot(density(y2), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1, 
+     col='forestgreen', main = "")
+par(new = TRUE)
+plot(density(y3), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1,
+     col='darkblue', main = "")
+par(new = TRUE)
+plot(density(y4), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "", lty = 1, 
+     type='l', col='sienna4', main = "")
+
+legend("topright", legend = c(paste("Sample size = ", sample_size[1:4])),
+       col = c("red", "forestgreen", "darkblue", "sienna4"),
+       cex = 0.8, text.font = 4, lty = 1, y.intersp = 1,
+       text.width = 4)
+
+dev.off()
+
+# phi1 ML
+
+y1 <- sqrt(10) * (sim_results_T_10$phi1_mle_sim$phi_0.9$phi1 - 0.9)
+y2 <- sqrt(80) * (sim_results_T_80$phi1_mle_sim$phi_0.9$phi1 - 0.9)
+y3 <- sqrt(200) * (sim_results_T_200$phi1_mle_sim$phi_0.9$phi1 - 0.9)
+y4 <- sqrt(320) * (sim_results_T_320$phi1_mle_sim$phi_0.9$phi1 - 0.9)
+
+xmin = -6.5
+xmax = 1
+ymax = 0.8
+
+png('phi1_mle_finite_sample_phi_0.9.jpg', width = 600, height = 600)
+
+plot(density(y1), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     type='l', xlab = "No. of Replications = 500, Phi 1 = 0.9",
+     col='red', lty = 1,
+     main="ML estimate of phi 1 for different sample sizes")
+par(new = TRUE)
+plot(density(y2), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1, 
+     col='forestgreen', main = "")
+par(new = TRUE)
+plot(density(y3), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1,
+     col='darkblue', main = "")
+par(new = TRUE)
+plot(density(y4), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "", lty = 1, 
+     type='l', col='sienna4', main = "")
+
+legend("topleft", legend = c(paste("Sample size = ", sample_size[1:4])),
+       col = c("red", "forestgreen", "darkblue", "sienna4"),
+       cex = 0.8, text.font = 4, lty = 1, y.intersp = 1,
+       text.width = 2)
+
+dev.off()
+
+# phi1 OLS
+
+y1 <- sqrt(10) * (sim_results_T_10$phi1_ols_sim$phi_0.9$phi1 - 0.9)
+y2 <- sqrt(80) * (sim_results_T_80$phi1_ols_sim$phi_0.9$phi1 - 0.9)
+y3 <- sqrt(200) * (sim_results_T_200$phi1_ols_sim$phi_0.9$phi1 - 0.9)
+y4 <- sqrt(320) * (sim_results_T_320$phi1_ols_sim$phi_0.9$phi1 - 0.9)
+
+xmin = -7
+xmax = 1.2
+ymax = 0.9
+
+png('phi1_ols_finite_sample_phi_0.9.jpg', width = 600, height = 600)
+
+plot(density(y1), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     type='l', xlab = "No. of Replications = 500, Phi 1 = 0.9",
+     col='red', lty = 1,
+     main="OLS estimate of phi 1 for different sample sizes")
+par(new = TRUE)
+plot(density(y2), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1, 
+     col='forestgreen', main = "")
+par(new = TRUE)
+plot(density(y3), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1,
+     col='darkblue', main = "")
+par(new = TRUE)
+plot(density(y4), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "", lty = 1, 
+     type='l', col='sienna4', main = "")
+
+legend("topleft", legend = c(paste("Sample size = ", sample_size[1:4])),
+       col = c("red", "forestgreen", "darkblue", "sienna4"),
+       cex = 0.8, text.font = 4, lty = 1, y.intersp = 1,
+       text.width = 2)
+
+dev.off()
+
+#Phi1 = 0.99
+# alpha ML
+
+y1 <- sqrt(10) * (sim_results_T_10$alpha_mle_sim$phi_0.99$phi1 - 0)
+y2 <- sqrt(80) * (sim_results_T_80$alpha_mle_sim$phi_0.99$phi1 - 0)
+y3 <- sqrt(200) * (sim_results_T_200$alpha_mle_sim$phi_0.99$phi1 - 0)
+y4 <- sqrt(320) * (sim_results_T_320$alpha_mle_sim$phi_0.99$phi1 - 0)
+
+xmax = 1000
+ymax = 0.007
+
+png('alpha_mle_finite_sample_phi_0.99.jpg', width = 600, height = 600)
+
+plot(density(y1), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     type='l', xlab = "No. of Replications = 500, Phi 1 = 0.99",
+     col='red', lty = 1,
+     main="ML estimate of alpha for different sample sizes")
+par(new = TRUE)
+plot(density(y2), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1, 
+     col='forestgreen', main = "")
+par(new = TRUE)
+plot(density(y3), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1,
+     col='darkblue', main = "")
+par(new = TRUE)
+plot(density(y4), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "", lty = 1, 
+     type='l', col='sienna4', main = "")
+
+legend("topright", legend = c(paste("Sample size = ", sample_size[1:4])),
+       col = c("red", "forestgreen", "darkblue", "sienna4"),
+       cex = 0.8, text.font = 4, lty = 1, y.intersp = 1,
+       text.width = 450)
+
+dev.off()
+
+# Beta ML
+
+y1 <- sqrt(10) * (sim_results_T_10$beta_mle_sim$phi_0.99$phi1 - 0)
+y2 <- sqrt(80) * (sim_results_T_80$beta_mle_sim$phi_0.99$phi1 - 0)
+y3 <- sqrt(200) * (sim_results_T_200$beta_mle_sim$phi_0.99$phi1 - 0)
+y4 <- sqrt(320) * (sim_results_T_320$beta_mle_sim$phi_0.99$phi1 - 0)
+
+xmax = 9
+ymax = 0.25
+
+png('beta_mle_finite_sample_phi_0.99.jpg', width = 600, height = 600)
+
+plot(density(y1), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     type='l', xlab = "No. of Replications = 500, Phi 1 = 0.99",
+     col='red', lty = 1,
+     main="ML estimate of beta for different sample sizes")
+par(new = TRUE)
+plot(density(y2), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1, 
+     col='forestgreen', main = "")
+par(new = TRUE)
+plot(density(y3), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1,
+     col='darkblue', main = "")
+par(new = TRUE)
+plot(density(y4), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "", lty = 1, 
+     type='l', col='sienna4', main = "")
+
+legend("topright", legend = c(paste("Sample size = ", sample_size[1:4])),
+       col = c("red", "forestgreen", "darkblue", "sienna4"),
+       cex = 0.8, text.font = 4, lty = 1, y.intersp = 1,
+       text.width = 4)
+
+dev.off()
+
+# phi1 ML
+
+y1 <- sqrt(10) * (sim_results_T_10$phi1_mle_sim$phi_0.99$phi1 - 0.99)
+y2 <- sqrt(80) * (sim_results_T_80$phi1_mle_sim$phi_0.99$phi1 - 0.99)
+y3 <- sqrt(200) * (sim_results_T_200$phi1_mle_sim$phi_0.99$phi1 - 0.99)
+y4 <- sqrt(320) * (sim_results_T_320$phi1_mle_sim$phi_0.99$phi1 - 0.99)
+
+xmin = -6.5
+xmax = 0.5
+ymax = 1
+
+png('phi1_mle_finite_sample_phi_0.99.jpg', width = 600, height = 600)
+
+plot(density(y1), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     type='l', xlab = "No. of Replications = 500, Phi 1 = 0.99",
+     col='red', lty = 1,
+     main="ML estimate of phi 1 for different sample sizes")
+par(new = TRUE)
+plot(density(y2), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1, 
+     col='forestgreen', main = "")
+par(new = TRUE)
+plot(density(y3), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1,
+     col='darkblue', main = "")
+par(new = TRUE)
+plot(density(y4), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "", lty = 1, 
+     type='l', col='sienna4', main = "")
+
+legend("topleft", legend = c(paste("Sample size = ", sample_size[1:4])),
+       col = c("red", "forestgreen", "darkblue", "sienna4"),
+       cex = 0.8, text.font = 4, lty = 1, y.intersp = 1,
+       text.width = 2)
+
+dev.off()
+
+# phi1 OLS
+
+y1 <- sqrt(10) * (sim_results_T_10$phi1_ols_sim$phi_0.99$phi1 - 0.99)
+y2 <- sqrt(80) * (sim_results_T_80$phi1_ols_sim$phi_0.99$phi1 - 0.99)
+y3 <- sqrt(200) * (sim_results_T_200$phi1_ols_sim$phi_0.99$phi1 - 0.99)
+y4 <- sqrt(320) * (sim_results_T_320$phi1_ols_sim$phi_0.99$phi1 - 0.99)
+
+xmin = -6.5
+xmax = 0.5
+ymax = 1.5
+
+png('phi1_ols_finite_sample_phi_0.99.jpg', width = 600, height = 600)
+
+plot(density(y1), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     type='l', xlab = "No. of Replications = 500, Phi 1 = 0.99",
+     col='red', lty = 1,
+     main="OLS estimate of phi 1 for different sample sizes")
+par(new = TRUE)
+plot(density(y2), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1, 
+     col='forestgreen', main = "")
+par(new = TRUE)
+plot(density(y3), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1,
+     col='darkblue', main = "")
+par(new = TRUE)
+plot(density(y4), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "", lty = 1, 
+     type='l', col='sienna4', main = "")
+
+legend("topleft", legend = c(paste("Sample size = ", sample_size[1:4])),
+       col = c("red", "forestgreen", "darkblue", "sienna4"),
+       cex = 0.8, text.font = 4, lty = 1, y.intersp = 1,
+       text.width = 2)
+
+dev.off()
+
+#Phi1 = 1
+# alpha ML
+
+y1 <- sqrt(10) * (sim_results_T_10$alpha_mle_sim$phi_1$phi1 - 0)
+y2 <- sqrt(80) * (sim_results_T_80$alpha_mle_sim$phi_1$phi1 - 0)
+y3 <- sqrt(200) * (sim_results_T_200$alpha_mle_sim$phi_1$phi1 - 0)
+y4 <- sqrt(320) * (sim_results_T_320$alpha_mle_sim$phi_1$phi1 - 0)
+
+xmax = 900
+ymax = 0.035
+
+png('alpha_mle_finite_sample_phi_1.jpg', width = 600, height = 600)
+
+plot(density(y1), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     type='l', xlab = "No. of Replications = 500, Phi 1 = 1",
+     col='red', lty = 1,
+     main="ML estimate of alpha for different sample sizes")
+par(new = TRUE)
+plot(density(y2), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1, 
+     col='forestgreen', main = "")
+par(new = TRUE)
+plot(density(y3), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1,
+     col='darkblue', main = "")
+par(new = TRUE)
+plot(density(y4), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "", lty = 1, 
+     type='l', col='sienna4', main = "")
+
+legend("topright", legend = c(paste("Sample size = ", sample_size[1:4])),
+       col = c("red", "forestgreen", "darkblue", "sienna4"),
+       cex = 0.8, text.font = 4, lty = 1, y.intersp = 1,
+       text.width = 450)
+
+dev.off()
+
+# Beta ML
+
+y1 <- sqrt(10) * (sim_results_T_10$beta_mle_sim$phi_1$phi1 - 0)
+y2 <- sqrt(80) * (sim_results_T_80$beta_mle_sim$phi_1$phi1 - 0)
+y3 <- sqrt(200) * (sim_results_T_200$beta_mle_sim$phi_1$phi1 - 0)
+y4 <- sqrt(320) * (sim_results_T_320$beta_mle_sim$phi_1$phi1 - 0)
+
+xmax = 10
+ymax = 0.15
+
+png('beta_mle_finite_sample_phi_1.jpg', width = 600, height = 600)
+
+plot(density(y1), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     type='l', xlab = "No. of Replications = 500, Phi 1 = 1",
+     col='red', lty = 1,
+     main="ML estimate of beta for different sample sizes")
+par(new = TRUE)
+plot(density(y2), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1, 
+     col='forestgreen', main = "")
+par(new = TRUE)
+plot(density(y3), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1,
+     col='darkblue', main = "")
+par(new = TRUE)
+plot(density(y4), ylim = c(0,ymax), xlim = c(-xmax, xmax),
+     axes = FALSE, xlab = "", ylab = "", lty = 1, 
+     type='l', col='sienna4', main = "")
+
+legend("topright", legend = c(paste("Sample size = ", sample_size[1:4])),
+       col = c("red", "forestgreen", "darkblue", "sienna4"),
+       cex = 0.8, text.font = 4, lty = 1, y.intersp = 1,
+       text.width = 5)
+
+dev.off()
+
+# phi1 ML
+
+y1 <- sqrt(10) * (sim_results_T_10$phi1_mle_sim$phi_1$phi1 - 1)
+y2 <- sqrt(80) * (sim_results_T_80$phi1_mle_sim$phi_1$phi1 - 1)
+y3 <- sqrt(200) * (sim_results_T_200$phi1_mle_sim$phi_1$phi1 - 1)
+y4 <- sqrt(320) * (sim_results_T_320$phi1_mle_sim$phi_1$phi1 - 1)
+
+xmin = -6.5
+xmax = 0.5
+ymax = 1
+
+png('phi1_mle_finite_sample_phi_1.jpg', width = 600, height = 600)
+
+plot(density(y1), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     type='l', xlab = "No. of Replications = 500, Phi 1 = 1",
+     col='red', lty = 1,
+     main="ML estimate of phi 1 for different sample sizes")
+par(new = TRUE)
+plot(density(y2), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1, 
+     col='forestgreen', main = "")
+par(new = TRUE)
+plot(density(y3), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1,
+     col='darkblue', main = "")
+par(new = TRUE)
+plot(density(y4), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "", lty = 1, 
+     type='l', col='sienna4', main = "")
+
+legend("topleft", legend = c(paste("Sample size = ", sample_size[1:4])),
+       col = c("red", "forestgreen", "darkblue", "sienna4"),
+       cex = 0.8, text.font = 4, lty = 1, y.intersp = 1,
+       text.width = 2)
+
+dev.off()
+
+# phi1 OLS
+
+y1 <- sqrt(10) * (sim_results_T_10$phi1_ols_sim$phi_1$phi1 - 1)
+y2 <- sqrt(80) * (sim_results_T_80$phi1_ols_sim$phi_1$phi1 - 1)
+y3 <- sqrt(200) * (sim_results_T_200$phi1_ols_sim$phi_1$phi1 - 1)
+y4 <- sqrt(320) * (sim_results_T_320$phi1_ols_sim$phi_1$phi1 - 1)
+
+xmin = -6.5
+xmax = 0.5
+ymax = 1.5
+
+png('phi1_ols_finite_sample_phi_1.jpg', width = 600, height = 600)
+
+plot(density(y1), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     type='l', xlab = "No. of Replications = 500, Phi 1 = 1",
+     col='red', lty = 1,
+     main="OLS estimate of phi 1 for different sample sizes")
+par(new = TRUE)
+plot(density(y2), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1, 
+     col='forestgreen', main = "")
+par(new = TRUE)
+plot(density(y3), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "",
+     type='l', lty = 1,
+     col='darkblue', main = "")
+par(new = TRUE)
+plot(density(y4), ylim = c(0,ymax), xlim = c(xmin, xmax),
+     axes = FALSE, xlab = "", ylab = "", lty = 1, 
+     type='l', col='sienna4', main = "")
+
+legend("topleft", legend = c(paste("Sample size = ", sample_size[1:4])),
+       col = c("red", "forestgreen", "darkblue", "sienna4"),
+       cex = 0.8, text.font = 4, lty = 1, y.intersp = 1,
+       text.width = 2)
+
+dev.off()
 
 ###---- QQ plots ---------------------------
 
@@ -664,7 +1285,7 @@ dev.off()
 
 jpeg('qqplot_beta_mle_for_phi0.5.jpg')
 qqnorm(sim_results_T_200$beta_mle_sim$phi_0.5$phi1, 
-       main = "ML estimate of alpha for phi1 = 0.5")
+       main = "ML estimate of beta for phi1 = 0.5")
 qqline(sim_results_T_200$beta_mle_sim$phi_0.5$phi1)
 dev.off()
 
