@@ -314,16 +314,19 @@ Table_2 <- list(alpha_mle = alpha_mle_3.2, beta_mle = beta_mle_3.2,
 
 ###----3.2.3 Simulation Tables---------------------------------------------------
 
-##Saving results of simulations with all sample size
+## Saving results of simulations with all sample size
 #sim_results_T_10 <- simulation(R = 500, T = 10)
 #sim_results_T_80 <- simulation(R = 500, T = 80)
 #sim_results_T_200 <- simulation(R = 500, T = 200)
 #sim_results_T_320 <- simulation(R = 500, T = 320)
 
-#save(sim_results_T_10, sim_results_T_80, sim_results_T_200, 
+# save(sim_results_T_10, sim_results_T_80, sim_results_T_200, 
 #     sim_results_T_320, file="simulation_results.RData")
 
-#Results have been saved use load("simulation_results.RData") to load
+# Results have been saved use load("simulation_results.RData") to load
+# Please note that the simulation function often gives error for large 
+# number of replications (due to singular hessian encoutered in MLE).
+# The results have been saved to avoid running into errors each time. 
 
 load("simulation_results.RData")
 sim_results_all <- list(sim_results_T_10, sim_results_T_80, 
@@ -359,7 +362,8 @@ for (t in 1:4){
     summary_phi1_ols[j,] <- c(paste("Phi1 = ", phi[i]), sample_size[t],
                               round(mean(sim_res), 4), 
                               round(sd(sim_res), 4),
-                              round(mean(sim_res) / sd(sim_res), 4),
+                              round((mean(sim_res) - phi[i])/ 
+                                sd(sim_res), 4),
                               round(mean(sim_res - phi[i]), 4),
                               round(sqrt(mean((sim_res) ^ 2)), 4),
                               round(quantile(sim_res, 0.05), 4),
@@ -398,7 +402,8 @@ for (t in 1:4){
     summary_phi1_mle[j,] <- c(paste("Phi1 = ", phi[i]), sample_size[t],
                               round(mean(sim_res), 4), 
                               round(sd(sim_res), 4),
-                              round(mean(sim_res) / sd(sim_res), 4),
+                              round((mean(sim_res) - phi[i])/
+                                      sd(sim_res), 4),
                               round(mean(sim_res - phi[i]), 4),
                               round(sqrt(mean((sim_res) ^ 2)), 4),
                               round(quantile(sim_res, 0.05), 4),
